@@ -20,11 +20,23 @@ export default function ProductCard({ product }) {
     toggleWishlist(product.id);
   };
 
+  const displayImage = (() => {
+    if (product.variants && product.variants.length > 0) {
+      const defaultVar = product.variants.find(v => v.is_default) || product.variants[0];
+      if (defaultVar && defaultVar.images && defaultVar.images.length > 0) {
+        const prim = defaultVar.images.find(img => typeof img === 'object' && img.is_primary);
+        return prim ? (prim.image_url || prim.url) : (typeof defaultVar.images[0] === 'string' ? defaultVar.images[0] : defaultVar.images[0].image_url);
+      }
+    }
+    return product.image || "/placeholder.png";
+  })();
+
   const handleAddToCartClick = (e) => {
     e.preventDefault();
     e.stopPropagation();
     if (product.inStock) {
-      addToCart(product, 1);
+      const defaultVar = product.variants && product.variants.length > 0 ? (product.variants.find(v => v.is_default) || product.variants[0]) : null;
+      addToCart(product, 1, defaultVar?.name || "", defaultVar?.id || null, displayImage);
     }
   };
 
@@ -35,11 +47,14 @@ export default function ProductCard({ product }) {
         <Link to={`/products/${product.slug}`}>
           
         <img
-  src={product.image}
-  alt={product.name}
-  loading="lazy"
-  className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
-/>
+          src={displayImage}
+          alt={product.name}
+          width="400"
+          height="400"
+          loading="lazy"
+          decoding="async"
+          className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
+        />
         </Link>
 
         {/* Out of Stock Overlay */}

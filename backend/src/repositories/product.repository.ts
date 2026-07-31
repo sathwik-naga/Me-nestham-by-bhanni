@@ -23,6 +23,112 @@ export class ProductRepository {
   }
 
   /**
+   * Enrich variants with their options and images in bulk
+   */
+  private async enrichVariants(products: Product[]): Promise<Product[]> {
+    const allVariants: any[] = [];
+    products.forEach((p) => {
+      if (p.variants && Array.isArray(p.variants)) {
+        allVariants.push(...p.variants);
+      }
+    });
+
+    if (allVariants.length === 0) return products;
+
+    const variantIds = allVariants.map((v) => v.id);
+
+    let optionsMap: Record<string, any[]> = {};
+    let imagesMap: Record<string, any[]> = {};
+
+    try {
+      const { data: optionsData, error: optionsError } = await supabase
+        .from('variant_options')
+        .select('*')
+        .in('variant_id', variantIds);
+
+      if (!optionsError && optionsData) {
+        optionsData.forEach((opt: any) => {
+          if (!optionsMap[opt.variant_id]) optionsMap[opt.variant_id] = [];
+          optionsMap[opt.variant_id].push({
+            option_name: opt.option_name,
+            option_value: opt.option_value,
+          });
+        });
+      }
+    } catch (err) {
+      logger.warn(`Failed to fetch variant_options (may not exist yet): ${err}`);
+    }
+
+    try {
+      const { data: imagesData, error: imagesError } = await supabase
+        .from('variant_images')
+        .select('*')
+        .in('variant_id', variantIds)
+        .order('is_primary', { ascending: false })
+        .order('sort_order', { ascending: true });
+
+      if (!imagesError && imagesData) {
+        imagesData.forEach((img: any) => {
+          if (!imagesMap[img.variant_id]) imagesMap[img.variant_id] = [];
+          
+          let publicUrl = img.image_url;
+          if (img.storage_path) {
+            const { data } = supabase.storage
+              .from('product-images')
+              .getPublicUrl(img.storage_path);
+            if (data?.publicUrl) {
+              publicUrl = data.publicUrl;
+            }
+          }
+
+          imagesMap[img.variant_id].push({
+            id: img.id,
+            variant_id: img.variant_id,
+            storage_path: img.storage_path || null,
+            image_url: publicUrl || '',
+            media_type: img.media_type || 'image',
+            alt_text: img.alt_text || null,
+            sort_order: img.sort_order !== undefined && img.sort_order !== null ? img.sort_order : (img.position || 0),
+            is_primary: !!img.is_primary,
+            position: img.sort_order !== undefined && img.sort_order !== null ? img.sort_order : (img.position || 0),
+          });
+        });
+      }
+    } catch (err) {
+      logger.warn(`Failed to fetch variant_images (may not exist yet): ${err}`);
+    }
+
+    // Enrich variants
+    allVariants.forEach((v) => {
+      // Normalize name & stock: DB has `variant_name` and `stock`
+      v.name = v.name || v.variant_name || [v.color, v.size].filter(Boolean).join(" / ") || "Default";
+      v.stock = v.stock !== undefined ? v.stock : (v.stock_quantity || 0);
+      v.stock_quantity = v.stock_quantity !== undefined ? v.stock_quantity : v.stock;
+
+      // Populate options
+      if (optionsMap[v.id]) {
+        v.options = optionsMap[v.id];
+      } else {
+        // Fallback to size, color, material columns if options are empty
+        const fallbackOptions: any[] = [];
+        if (v.size) fallbackOptions.push({ option_name: 'Size', option_value: v.size });
+        if (v.color) fallbackOptions.push({ option_name: 'Color', option_value: v.color });
+        if (v.material) fallbackOptions.push({ option_name: 'Material', option_value: v.material });
+        v.options = fallbackOptions;
+      }
+
+      // Populate images
+      if (imagesMap[v.id]) {
+        v.images = imagesMap[v.id];
+      } else {
+        v.images = [];
+      }
+    });
+
+    return products;
+  }
+
+  /**
    * Query filtered and paginated products
    */
   async getProducts(filters: ProductFilters): Promise<{ products: Product[]; count: number }> {
@@ -104,6 +210,7 @@ export class ProductRepository {
       }
 
       const formattedProducts = (data || []).map((prod) => this.formatProduct(prod));
+      await this.enrichVariants(formattedProducts);
 
       return {
         products: formattedProducts,
@@ -140,7 +247,9 @@ export class ProductRepository {
         throw new AppError('Failed to fetch product details', 500);
       }
 
-      return this.formatProduct(data);
+      const formatted = this.formatProduct(data);
+      await this.enrichVariants([formatted]);
+      return formatted;
     } catch (err) {
       if (err instanceof AppError) throw err;
       logger.error(`Unexpected error fetching product details for ID ${id}: ${err}`);
@@ -172,7 +281,9 @@ export class ProductRepository {
         throw new AppError('Failed to fetch product details', 500);
       }
 
-      return this.formatProduct(data);
+      const formatted = this.formatProduct(data);
+      await this.enrichVariants([formatted]);
+      return formatted;
     } catch (err) {
       if (err instanceof AppError) throw err;
       logger.error(`Unexpected error fetching product details by slug: ${err}`);
@@ -209,6 +320,12 @@ export class ProductRepository {
    */
   async update(id: string, product: Partial<Omit<Product, 'id' | 'created_at' | 'updated_at' | 'category' | 'images' | 'variants' | 'featured_image' | 'gallery_images'>>): Promise<Product> {
     try {
+      if (Object.keys(product).length === 0) {
+        const existing = await this.getById(id);
+        if (!existing) throw new AppError('Product not found', 404);
+        return existing;
+      }
+
       const { data, error } = await supabaseAdmin
         .from('products')
         .update(product)
@@ -218,7 +335,7 @@ export class ProductRepository {
 
       if (error) {
         logger.error(`Database error updating product ${id}: ${error.message}`);
-        throw new AppError('Failed to update product', 500);
+        throw new AppError(`Failed to update product: ${error.message}`, 500);
       }
 
       return this.formatProduct(data);
@@ -299,15 +416,31 @@ export class ProductRepository {
    */
   async createVariant(variant: Omit<ProductVariant, 'id' | 'created_at'>): Promise<ProductVariant> {
     try {
+      const insertPayload: Record<string, any> = {
+        product_id: variant.product_id,
+        sku: variant.sku,
+        price: variant.price,
+        stock: variant.stock !== undefined ? variant.stock : (variant.stock_quantity || 0),
+        sale_price: variant.sale_price !== undefined ? variant.sale_price : null,
+        weight: variant.weight !== undefined ? variant.weight : null,
+        is_default: variant.is_default || false,
+        status: variant.status || 'active',
+        variant_name: variant.name || (variant as any).variant_name || '',
+      };
+
+      if (variant.size !== undefined && variant.size !== null) insertPayload.size = variant.size;
+      if (variant.color !== undefined && variant.color !== null) insertPayload.color = variant.color;
+      if (variant.material !== undefined && variant.material !== null) insertPayload.material = variant.material;
+
       const { data, error } = await supabaseAdmin
         .from('product_variants')
-        .insert([variant])
+        .insert([insertPayload])
         .select()
         .single();
 
       if (error) {
         logger.error(`Database error creating variant: ${error.message}`);
-        throw new AppError('Failed to create variant', 500);
+        throw new AppError(`Failed to create variant: ${error.message}`, 500);
       }
 
       return data as ProductVariant;
@@ -336,6 +469,82 @@ export class ProductRepository {
       if (err instanceof AppError) throw err;
       logger.error(`Unexpected error clearing variants: ${err}`);
       throw new AppError('Internal server error during variants cleanup', 500);
+    }
+  }
+
+  /**
+   * Insert variant options in bulk
+   */
+  async createVariantOptions(options: { variant_id: string; option_name: string; option_value: string }[]): Promise<void> {
+    try {
+      const { error } = await supabaseAdmin
+        .from('variant_options')
+        .insert(options);
+      if (error) {
+        logger.error(`Database error creating variant options: ${error.message}`);
+      }
+    } catch (err) {
+      logger.error(`Unexpected error creating variant options: ${err}`);
+    }
+  }
+
+  /**
+   * Insert variant images in bulk
+   */
+  async createVariantImages(images: {
+    variant_id: string;
+    image_url?: string;
+    storage_path?: string | null;
+    media_type?: string;
+    alt_text?: string | null;
+    sort_order?: number;
+    is_primary?: boolean;
+    position?: number;
+  }[]): Promise<void> {
+    try {
+      if (!images || images.length === 0) return;
+
+      // Group images by variant_id to enforce single primary image rule
+      const groupedByVariant: Record<string, typeof images> = {};
+      images.forEach((img) => {
+        if (!groupedByVariant[img.variant_id]) groupedByVariant[img.variant_id] = [];
+        groupedByVariant[img.variant_id].push(img);
+      });
+
+      const formattedPayloads: any[] = [];
+
+      Object.values(groupedByVariant).forEach((variantImgs) => {
+        let hasPrimary = variantImgs.some((i) => i.is_primary === true);
+        
+        variantImgs.forEach((img, idx) => {
+          // Single primary image rule: if no primary selected, default first image to primary
+          const isPrimary = hasPrimary ? (img.is_primary === true) : (idx === 0);
+          if (isPrimary) hasPrimary = true; // only first marked primary stays true
+
+          const order = img.sort_order !== undefined ? img.sort_order : (img.position !== undefined ? img.position : idx);
+
+          formattedPayloads.push({
+            variant_id: img.variant_id,
+            storage_path: img.storage_path || null,
+            image_url: img.image_url || null,
+            media_type: img.media_type || 'image',
+            alt_text: img.alt_text || null,
+            sort_order: order,
+            position: order,
+            is_primary: isPrimary,
+          });
+        });
+      });
+
+      const { error } = await supabaseAdmin
+        .from('variant_images')
+        .insert(formattedPayloads);
+
+      if (error) {
+        logger.error(`Database error creating variant images: ${error.message}`);
+      }
+    } catch (err) {
+      logger.error(`Unexpected error creating variant images: ${err}`);
     }
   }
 }

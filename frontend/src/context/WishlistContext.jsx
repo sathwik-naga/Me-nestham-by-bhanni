@@ -1,11 +1,21 @@
 import React, { createContext, useContext, useState, useEffect } from "react";
 import { useAuth } from "./AuthContext";
+import { trackAddToWishlist } from "../services/analytics/analytics";
 
 const WishlistContext = createContext();
 
 export const WishlistProvider = ({ children }) => {
   const { user } = useAuth();
   const [wishlist, setWishlist] = useState([]);
+
+  // Listen to global logout event
+  useEffect(() => {
+    const handleAuthLogout = () => {
+      setWishlist([]);
+    };
+    window.addEventListener("mn-auth-logout", handleAuthLogout);
+    return () => window.removeEventListener("mn-auth-logout", handleAuthLogout);
+  }, []);
 
   // Wishlist Storage key
   const getWishlistKey = () => {
@@ -50,16 +60,20 @@ export const WishlistProvider = ({ children }) => {
   };
 
   const addToWishlist = (productId) => {
+    if (!user) return;
     if (!wishlist.includes(productId)) {
       saveWishlist([...wishlist, productId]);
+      trackAddToWishlist({ id: productId });
     }
   };
 
   const removeFromWishlist = (productId) => {
+    if (!user) return;
     saveWishlist(wishlist.filter(id => id !== productId));
   };
 
   const toggleWishlist = (productId) => {
+    if (!user) return;
     if (wishlist.includes(productId)) {
       removeFromWishlist(productId);
     } else {

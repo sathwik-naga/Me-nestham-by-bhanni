@@ -37,8 +37,8 @@ export class CartController {
         throw new AppError('Unauthorized: User session not found', 401);
       }
 
-      const { product_id, quantity } = req.body;
-      const result = await cartService.addItemToCart(req.user.id, product_id, quantity);
+      const { product_id, quantity, variant_id } = req.body;
+      const result = await cartService.addItemToCart(req.user.id, product_id, quantity, variant_id);
 
       res.status(200).json({
         status: 'success',

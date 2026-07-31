@@ -4,10 +4,12 @@ export interface CartItem {
   id: string;
   cart_id: string;
   product_id: string;
+  variant_id?: string | null;
   quantity: number;
   created_at: string;
   updated_at: string;
   product?: Product | null;
+  variant?: any | null;
 }
 
 export interface Cart {
@@ -15,6 +17,8 @@ export interface Cart {
   user_id: string;
   created_at: string;
   updated_at: string;
+  coupon_code?: string | null;
+  gift_card_code?: string | null;
   items: CartItem[];
 }
 
@@ -23,7 +27,11 @@ export interface CartSummary {
   subtotal: number;
   shipping: number;
   discount: number;
+  tax: number;
+  giftCardDiscount: number;
   grandTotal: number;
+  couponCode?: string | null;
+  giftCardCode?: string | null;
 }
 
 export interface CartResponse {

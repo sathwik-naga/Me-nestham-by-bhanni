@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from "react";
-import { useParams, Link } from "react-router-dom";
+import { useParams, Link, useNavigate } from "react-router-dom";
 import { db } from "../services/db";
 import { api } from "../services/api";
+import { useAuth } from "../context/AuthContext";
 import { 
   Package, CheckCircle2, ChevronRight, PhoneCall, AlertTriangle, 
   Trash2, ExternalLink, Calendar, MapPin, Truck
@@ -10,6 +11,15 @@ import { motion, AnimatePresence } from "framer-motion";
 
 export default function OrderTracking() {
   const { orderId } = useParams();
+  const navigate = useNavigate();
+  const { user, isAuthenticated } = useAuth();
+
+  useEffect(() => {
+    if (!isAuthenticated && !localStorage.getItem("access_token")) {
+      navigate("/auth");
+    }
+  }, [isAuthenticated, navigate]);
+
   const [order, setOrder] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -30,6 +40,9 @@ export default function OrderTracking() {
   };
 
   const getDynamicHistory = (ord) => {
+    if (ord.trackingEvents && ord.trackingEvents.length > 0) {
+      return ord.trackingEvents;
+    }
     const history = [];
     const createdDate = new Date(ord.created_at || ord.date || new Date());
     
@@ -101,7 +114,15 @@ export default function OrderTracking() {
       total: Number(b.grand_total),
       status: mappedStatus,
       paymentStatus: b.payment_status,
-      trackingNumber: b.razorpay_order_id || ("TRK-" + b.id.split("-")[0].toUpperCase()),
+      trackingNumber: b.tracking_number || b.awb_code || b.razorpay_order_id || ("TRK-" + b.id.split("-")[0].toUpperCase()),
+      shipmentId: b.shipment_id || null,
+      awbCode: b.awb_code || null,
+      courierName: b.courier_name || null,
+      trackingUrl: b.tracking_url || null,
+      shippingStatus: b.shipping_status || null,
+      pickupStatus: b.pickup_status || null,
+      estimatedDelivery: b.estimated_delivery || null,
+      trackingEvents: b.tracking_events || [],
       shippingAddress: {
         fullName: b.shipping_address?.full_name || "Customer",
         phone: b.shipping_address?.phone || "",
@@ -119,12 +140,13 @@ export default function OrderTracking() {
         image: item.featured_image || "/placeholder.png",
         variant: "",
       })),
-      history: getDynamicHistory({ ...b, status: mappedStatus })
+      history: getDynamicHistory({ ...b, status: mappedStatus, trackingEvents: b.tracking_events || [] })
     };
   };
 
   useEffect(() => {
     const fetchOrder = async () => {
+      if (!isAuthenticated) return;
       setLoading(true);
       setError(null);
       try {
@@ -138,10 +160,10 @@ export default function OrderTracking() {
       }
     };
 
-    if (orderId) {
+    if (orderId && isAuthenticated) {
       fetchOrder();
     }
-  }, [orderId]);
+  }, [orderId, isAuthenticated]);
 
   if (loading) {
     return (
@@ -313,13 +335,27 @@ export default function OrderTracking() {
               <span className="font-bold text-brand-text text-xs uppercase tracking-wider flex items-center gap-1.5">
                 <Calendar className="text-brand-primary" size={14} /> Delivery ETA
               </span>
-              <p className="font-serif text-lg font-bold text-brand-success">{formattedDeliveryDate}</p>
+              <p className="font-serif text-lg font-bold text-brand-success">
+                {order.estimatedDelivery 
+                  ? new Date(order.estimatedDelivery).toLocaleDateString('en-US', options) 
+                  : formattedDeliveryDate}
+              </p>
               <span className="text-[10px] text-brand-text-muted leading-relaxed">
-                Courier Carrier: <span className="font-bold text-brand-text">Delhivery Express</span>
+                Courier Carrier: <span className="font-bold text-brand-text">{order.courierName || "Awaiting Assignment"}</span>
               </span>
               <span className="text-[10px] text-brand-text-muted leading-relaxed">
-                Tracking AWB: <span className="font-mono font-bold text-brand-text flex items-center gap-1 mt-0.5">{order.trackingNumber} <ExternalLink size={10} /></span>
+                Tracking AWB: <span className="font-mono font-bold text-brand-text flex items-center gap-1 mt-0.5">{order.trackingNumber || "Awaiting Assignment"}</span>
               </span>
+              {order.trackingUrl && (
+                <a
+                  href={order.trackingUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="bg-brand-primary hover:bg-brand-accent text-white text-[10px] font-bold px-4 py-2.5 rounded-xl text-center shadow-sm flex items-center justify-center gap-1.5 mt-2.5 transition-all w-full cursor-pointer"
+                >
+                  Track Package <ExternalLink size={11} />
+                </a>
+              )}
             </div>
           )}
 
@@ -339,7 +375,7 @@ export default function OrderTracking() {
       </div>
 
       {/* Footer controls & Action triggers */}
-      <div className="flex flex-col sm:flex-row gap-4 justify-between items-center bg-brand-secondary dark:bg-[#201D1B] border border-brand-border p-5 rounded-2xl">
+      <div className="flex flex-col sm:flex-row gap-4 justify-between items-center bg-brand-secondary border border-brand-border p-5 rounded-2xl">
         <a 
           href={`https://wa.me/919999999999?text=Hi, I need help with my Order ID ${order.id}`}
           target="_blank"
@@ -409,7 +445,7 @@ export default function OrderTracking() {
                     </button>
                     <button
                       onClick={handleCancelOrder}
-                      className="bg-brand-error text-white py-2.5 rounded-xl font-semibold hover:bg-[#A82B1E] shadow-sm flex items-center justify-center gap-1"
+                      className="bg-brand-error text-white py-2.5 rounded-xl font-semibold hover:opacity-90 transition-all shadow-sm flex items-center justify-center gap-1 cursor-pointer"
                     >
                       <Trash2 size={13} /> Confirm Cancel
                     </button>

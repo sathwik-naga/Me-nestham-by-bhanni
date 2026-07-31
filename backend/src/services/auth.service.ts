@@ -2,7 +2,13 @@ import { UserRepository } from '../repositories/user.repository';
 import { ProfileRepository } from '../repositories/profile.repository';
 import { Profile } from '../interfaces/user.interface';
 import { AppError } from '../middleware/error';
+import { supabaseAdmin } from '../lib/supabase';
+import { EmailService } from './email.service';
+import { EmailRepository } from '../repositories/email.repository';
+import { ResendProvider } from '../providers/resend.provider';
 import logger from '../utils/logger';
+
+const emailService = new EmailService(new EmailRepository(), new ResendProvider());
 
 export class AuthService {
   constructor(
@@ -40,6 +46,11 @@ export class AuthService {
     } else {
       logger.info(`Profile fetched successfully (created via trigger) for user ID ${user.id}`);
     }
+    // Send welcome email (asynchronous queue)
+    emailService.sendWelcomeEmail(email, fullName || 'Customer').catch((err) => {
+      logger.error(`Failed to trigger welcome email on registration: ${err}`);
+    });
+
     return {
       session: session || null,
       user: {
@@ -76,7 +87,7 @@ export class AuthService {
       });
     }
 
-    const role = (user.app_metadata?.role as 'customer' | 'admin') || 'customer';
+    const role = profile.role || 'customer';
     logger.info(`Successful login for user: ${email} (Role: ${role})`);
 
     return {
@@ -88,7 +99,7 @@ export class AuthService {
       profile: {
         ...profile,
         email: user.email,
-        role, // Include role from Auth JWT app_metadata in response
+        role,
       },
     };
   }
@@ -112,5 +123,47 @@ export class AuthService {
       throw new AppError('User profile not found', 404);
     }
     return profile;
+  }
+
+  /**
+   * Handle forgot password recovery link generation and email enqueuing
+   */
+  async forgotPassword(email: string): Promise<void> {
+    logger.info(`Password reset requested for: ${email}`);
+    try {
+      const { data, error } = await supabaseAdmin.auth.admin.generateLink({
+        type: 'recovery',
+        email,
+        options: {
+          redirectTo: `${process.env.CORS_ORIGIN || 'http://localhost:5173'}/reset-password`
+        }
+      });
+
+      if (!error && data?.properties?.action_link) {
+        const actionLink = data.properties.action_link;
+        await emailService.sendPasswordResetEmail(email, actionLink);
+        logger.info(`Reset link generated and emailed to ${email}`);
+      } else {
+        logger.warn(`Suppressed forgot password error to avoid enumeration: ${error?.message || 'No action link'}`);
+      }
+    } catch (err) {
+      logger.error(`Unexpected forgot password error: ${err}`);
+    }
+  }
+
+  /**
+   * Reset user password (expects authenticated session established by recovery token)
+   */
+  async resetPassword(userId: string, password: string): Promise<void> {
+    logger.info(`Resetting password for user ID: ${userId}`);
+    const { error } = await supabaseAdmin.auth.admin.updateUserById(userId, {
+      password
+    });
+
+    if (error) {
+      logger.error(`Supabase password reset failed: ${error.message}`);
+      throw new AppError(error.message, 400);
+    }
+    logger.info(`Password successfully reset for user ID: ${userId}`);
   }
 }

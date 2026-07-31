@@ -1,10 +1,12 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Link, NavLink, useNavigate } from "react-router-dom";
+import logo from "../assets/logo.jpeg";
 import { useAuth } from "../context/AuthContext";
 import { useCart } from "../context/CartContext";
 import { useWishlist } from "../context/WishlistContext";
 import { useTheme } from "../context/ThemeContext";
 import { db } from "../services/db";
+import { api } from "../services/api";
 import { 
   Search, Heart, ShoppingCart, User, Sun, Moon, 
   Menu, X, ChevronDown, LogOut, Settings, LayoutDashboard, ShoppingBag
@@ -22,6 +24,21 @@ export default function Header({ onCartClick }) {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [profileDropdownOpen, setProfileDropdownOpen] = useState(false);
   const [announcementDismissed, setAnnouncementDismissed] = useState(false);
+  const [announcementText, setAnnouncementText] = useState("");
+
+  useEffect(() => {
+    async function loadAnnouncement() {
+      try {
+        const res = await api.get("/promotions/announcements/active");
+        if (res.data.status === "success" && res.data.data.announcement) {
+          setAnnouncementText(res.data.data.announcement.text);
+        }
+      } catch (err) {
+        console.error("Failed to load announcement bar text:", err);
+      }
+    }
+    loadAnnouncement();
+  }, []);
 
   const categories = db.getCategories();
 
@@ -43,10 +60,10 @@ export default function Header({ onCartClick }) {
   return (
     <header className="sticky top-0 z-40 w-full transition-shadow duration-300">
       {/* Announcement Bar */}
-      {!announcementDismissed && (
-        <div className="bg-brand-primary text-brand-secondary text-xs px-4 py-2 flex items-center justify-between font-accent font-medium">
+      {!announcementDismissed && announcementText && (
+        <div className="bg-brand-primary text-brand-secondary text-xs px-4 py-2 flex items-center justify-between font-accent font-medium animate-fade-in">
           <div className="flex-1 text-center font-semibold tracking-wide">
-            ✨ Free Shipping on Orders Above ₹499! Use Code <span className="underline">WELCOME10</span> for 10% Off ✨
+            {announcementText}
           </div>
           <button 
             onClick={() => setAnnouncementDismissed(true)} 
@@ -62,7 +79,7 @@ export default function Header({ onCartClick }) {
       <nav className="glass border-b border-brand-border py-4 px-6 md:px-12 flex items-center justify-between">
         {/* Left Side: Brand Logo and Title */}
         <Link to="/" className="flex items-center gap-3 group">
-          <img src="/src/assets/logo.svg" alt="Me Nestham Brand Mark" className="w-10 h-10 group-hover:scale-105 transition-transform" />
+          <img src={logo} alt="Me Nestham by Bhanni Logo" className="w-10 h-10 rounded-full object-cover shadow-sm group-hover:scale-105 transition-transform" />
           <div className="flex flex-col">
             <span className="font-serif text-lg md:text-xl font-bold tracking-tight text-brand-primary group-hover:text-brand-accent transition-colors">
               Me Nestham
@@ -93,7 +110,7 @@ export default function Header({ onCartClick }) {
                 <Link
                   key={cat.id}
                   to={`/categories/${cat.slug}`}
-                  className="flex items-start gap-3 p-3 rounded-lg hover:bg-brand-secondary hover:dark:bg-[#2D2723] transition-colors"
+                  className="flex items-start gap-3 p-3 rounded-lg hover:bg-brand-secondary transition-colors"
                 >
                   <img src={cat.image} alt={cat.name} className="w-12 h-12 rounded-md object-cover" />
                   <div>
@@ -110,9 +127,6 @@ export default function Header({ onCartClick }) {
             </div>
           </div>
 
-          <NavLink to="/about" className={({ isActive }) => `hover:text-brand-primary transition-colors ${isActive ? 'text-brand-primary font-semibold' : ''}`}>
-            About
-          </NavLink>
           <NavLink to="/contact" className={({ isActive }) => `hover:text-brand-primary transition-colors ${isActive ? 'text-brand-primary font-semibold' : ''}`}>
             Contact
           </NavLink>
@@ -123,7 +137,7 @@ export default function Header({ onCartClick }) {
           {/* Search Trigger */}
           <button 
             onClick={() => setSearchOpen(!searchOpen)} 
-            className="p-2 hover:bg-brand-secondary hover:dark:bg-[#2D2723] rounded-full transition-colors relative"
+            className="p-2 hover:bg-brand-secondary rounded-full transition-colors relative"
             aria-label="Open Search"
           >
             <Search size={20} />
@@ -132,7 +146,7 @@ export default function Header({ onCartClick }) {
           {/* Theme Toggle */}
           <button 
             onClick={toggleTheme} 
-            className="p-2 hover:bg-brand-secondary hover:dark:bg-[#2D2723] rounded-full transition-colors text-brand-text"
+            className="p-2 hover:bg-brand-secondary rounded-full transition-colors text-brand-text"
             aria-label="Toggle Theme"
           >
             {theme === "dark" ? <Sun size={20} /> : <Moon size={20} />}
@@ -141,7 +155,7 @@ export default function Header({ onCartClick }) {
           {/* Wishlist Link */}
           <Link 
             to="/profile?tab=wishlist" 
-            className="p-2 hover:bg-brand-secondary hover:dark:bg-[#2D2723] rounded-full transition-colors relative"
+            className="p-2 hover:bg-brand-secondary rounded-full transition-colors relative"
             aria-label="View Wishlist"
           >
             <Heart size={20} />
@@ -155,7 +169,7 @@ export default function Header({ onCartClick }) {
           {/* Cart Trigger */}
           <button 
             onClick={onCartClick} 
-            className="p-2 hover:bg-brand-secondary hover:dark:bg-[#2D2723] rounded-full transition-colors relative"
+            className="p-2 hover:bg-brand-secondary rounded-full transition-colors relative"
             aria-label="Open Cart"
           >
             <ShoppingCart size={20} />
@@ -172,7 +186,7 @@ export default function Header({ onCartClick }) {
               <>
                 <button 
                   onClick={() => setProfileDropdownOpen(!profileDropdownOpen)}
-                  className="flex items-center gap-1 p-2 hover:bg-brand-secondary hover:dark:bg-[#2D2723] rounded-full transition-colors"
+                  className="flex items-center gap-1 p-2 hover:bg-brand-secondary rounded-full transition-colors"
                 >
                   <User size={20} className="text-brand-primary" />
                   <ChevronDown size={14} className="text-brand-text-muted hidden md:block" />
@@ -191,7 +205,7 @@ export default function Header({ onCartClick }) {
                         <Link 
                           to="/admin" 
                           onClick={() => setProfileDropdownOpen(false)}
-                          className="flex items-center gap-2 px-4 py-2 hover:bg-brand-secondary hover:dark:bg-[#2D2723] text-brand-accent font-semibold transition-colors"
+                          className="flex items-center gap-2 px-4 py-2 hover:bg-brand-secondary text-brand-accent font-semibold transition-colors"
                         >
                           <LayoutDashboard size={16} /> Admin Panel
                         </Link>
@@ -200,7 +214,7 @@ export default function Header({ onCartClick }) {
                       <Link 
                         to="/profile" 
                         onClick={() => setProfileDropdownOpen(false)}
-                        className="flex items-center gap-2 px-4 py-2 hover:bg-brand-secondary hover:dark:bg-[#2D2723] transition-colors"
+                        className="flex items-center gap-2 px-4 py-2 hover:bg-brand-secondary transition-colors"
                       >
                         <User size={16} /> My Profile
                       </Link>
@@ -208,14 +222,14 @@ export default function Header({ onCartClick }) {
                       <Link 
                         to="/profile?tab=orders" 
                         onClick={() => setProfileDropdownOpen(false)}
-                        className="flex items-center gap-2 px-4 py-2 hover:bg-brand-secondary hover:dark:bg-[#2D2723] transition-colors"
+                        className="flex items-center gap-2 px-4 py-2 hover:bg-brand-secondary transition-colors"
                       >
                         <ShoppingBag size={16} /> My Orders
                       </Link>
 
                       <button 
                         onClick={handleLogout}
-                        className="w-full text-left flex items-center gap-2 px-4 py-2 hover:bg-brand-secondary hover:dark:bg-[#2D2723] text-brand-error border-t border-brand-border mt-1 transition-colors"
+                        className="w-full text-left flex items-center gap-2 px-4 py-2 hover:bg-brand-secondary text-brand-error border-t border-brand-border mt-1 transition-colors"
                       >
                         <LogOut size={16} /> Logout
                       </button>
@@ -226,7 +240,7 @@ export default function Header({ onCartClick }) {
             ) : (
               <Link 
                 to="/auth" 
-                className="p-2 hover:bg-brand-secondary hover:dark:bg-[#2D2723] rounded-full transition-colors flex items-center"
+                className="p-2 hover:bg-brand-secondary rounded-full transition-colors flex items-center"
                 aria-label="Login"
               >
                 <User size={20} />
@@ -237,7 +251,7 @@ export default function Header({ onCartClick }) {
           {/* Mobile Hamburger Trigger */}
           <button 
             onClick={() => setMobileMenuOpen(true)} 
-            className="lg:hidden p-2 hover:bg-brand-secondary hover:dark:bg-[#2D2723] rounded-full transition-colors"
+            className="lg:hidden p-2 hover:bg-brand-secondary rounded-full transition-colors"
             aria-label="Open Navigation Menu"
           >
             <Menu size={20} />
@@ -255,7 +269,7 @@ export default function Header({ onCartClick }) {
               placeholder="Search handcrafted jewelry, clay pottery, Madhubani paintings..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="flex-1 bg-brand-secondary dark:bg-[#25211E] text-brand-text px-4 py-3 rounded-lg border border-brand-border focus:border-brand-primary outline-none text-sm transition-all"
+              className="flex-1 bg-brand-secondary text-brand-text px-4 py-3 rounded-lg border border-brand-border focus:border-brand-primary outline-none text-sm transition-all"
               autoFocus
             />
             <button 
@@ -267,7 +281,7 @@ export default function Header({ onCartClick }) {
             <button 
               type="button" 
               onClick={() => setSearchOpen(false)} 
-              className="p-2 hover:bg-brand-secondary hover:dark:bg-[#25211E] rounded-full"
+              className="p-2 hover:bg-brand-secondary rounded-full"
             >
               <X size={20} />
             </button>
@@ -283,16 +297,19 @@ export default function Header({ onCartClick }) {
             <div>
               <div className="flex items-center justify-between mb-8">
                 <Link to="/" onClick={() => setMobileMenuOpen(false)} className="flex items-center gap-2">
-                  <img src="/src/assets/logo.svg" alt="Me Nestham Logo" className="w-8 h-8" />
-                  <span className="font-serif text-lg font-bold text-brand-primary">Me Nestham</span>
+                  <img src={logo} alt="Me Nestham by Bhanni Logo" className="w-8 h-8 rounded-full object-cover shadow-sm" />
+                  <div className="flex flex-col">
+                    <span className="font-serif text-base font-bold text-brand-primary">Me Nestham</span>
+                    <span className="text-[8px] uppercase tracking-widest text-brand-text-muted font-accent font-bold">By Bhanni</span>
+                  </div>
                 </Link>
-                <button onClick={() => setMobileMenuOpen(false)} className="p-1 hover:bg-brand-secondary hover:dark:bg-[#25211E] rounded-full">
+                <button onClick={() => setMobileMenuOpen(false)} className="p-1 hover:bg-brand-secondary rounded-full">
                   <X size={22} />
                 </button>
               </div>
 
               {/* User Greeting CTA */}
-              <div className="p-4 bg-brand-secondary dark:bg-[#221E1C] border border-brand-border rounded-xl mb-6">
+              <div className="p-4 bg-brand-secondary border border-brand-border rounded-xl mb-6">
                 {user ? (
                   <div>
                     <p className="text-xs text-brand-text-muted">Welcome back,</p>
@@ -332,9 +349,6 @@ export default function Header({ onCartClick }) {
                 <Link to="/profile" onClick={() => setMobileMenuOpen(false)} className="hover:text-brand-primary flex items-center gap-3">
                   👤 My Profile
                 </Link>
-                <Link to="/about" onClick={() => setMobileMenuOpen(false)} className="hover:text-brand-primary flex items-center gap-3">
-                  ℹ️ About Us
-                </Link>
                 <Link to="/contact" onClick={() => setMobileMenuOpen(false)} className="hover:text-brand-primary flex items-center gap-3">
                   📞 Contact support
                 </Link>
@@ -363,7 +377,7 @@ export default function Header({ onCartClick }) {
                 <span>Theme:</span>
                 <button 
                   onClick={toggleTheme} 
-                  className="bg-brand-secondary dark:bg-[#25211E] px-3 py-1.5 rounded-lg border border-brand-border font-semibold text-brand-text"
+                  className="bg-brand-secondary px-3 py-1.5 rounded-lg border border-brand-border font-semibold text-brand-text"
                 >
                   {theme === "dark" ? "☀️ Light Mode" : "🌙 Dark Mode"}
                 </button>

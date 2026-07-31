@@ -3,6 +3,7 @@ import { z } from 'zod';
 export const addToCartSchema = z.object({
   body: z.object({
     product_id: z.string().uuid('Invalid product ID format'),
+    variant_id: z.string().uuid('Invalid variant ID format').optional().nullable(),
     quantity: z.number().int('Quantity must be an integer').min(1, 'Quantity must be at least 1'),
   }),
 });

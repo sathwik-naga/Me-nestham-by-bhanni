@@ -1,6 +1,8 @@
 import React, { createContext, useContext, useState, useEffect } from "react";
 import { authService } from "../services/auth";
 import { api } from "../services/api";
+import { clearAuthSession, isTokenExpired } from "../utils/authHelper";
+import { trackAuth } from "../services/analytics/analytics";
 
 const AuthContext = createContext();
 
@@ -9,11 +11,27 @@ export const AuthProvider = ({ children }) => {
   const [profile, setProfile] = useState(null);
   const [loading, setLoading] = useState(true);
 
+  // Listen to global logout event
+  useEffect(() => {
+    const handleAuthLogout = () => {
+      setUser(null);
+      setProfile(null);
+      setLoading(false);
+    };
+    window.addEventListener("mn-auth-logout", handleAuthLogout);
+    return () => window.removeEventListener("mn-auth-logout", handleAuthLogout);
+  }, []);
+
   // Initialize auth state by verifying session against the backend
   useEffect(() => {
     const initAuth = async () => {
       const token = localStorage.getItem("access_token");
       if (token) {
+        if (isTokenExpired(token)) {
+          clearAuthSession();
+          setLoading(false);
+          return;
+        }
         try {
           const result = await api.get("/auth/me");
 
@@ -34,19 +52,21 @@ export const AuthProvider = ({ children }) => {
             setProfile(fullProfile);
           } else {
             // Token has expired or is invalid
-            localStorage.removeItem("access_token");
-            localStorage.removeItem("mn_current_user");
-            setUser(null);
-            setProfile(null);
+            clearAuthSession();
           }
         } catch (err) {
-          console.error("Failed to restore session via backend, falling back to local cache", err);
-          // Network error or offline mode: fall back to cached session if available
-          const activeUser = authService.getCurrentUser();
-          if (activeUser) {
-            setUser(activeUser);
-            const fullProfile = authService.getUserProfile(activeUser.id);
-            setProfile(fullProfile);
+          if (err.status === 401 || err.status === 403) {
+            // Never restore cached profile after an authentication failure
+            clearAuthSession();
+          } else {
+            console.error("Failed to restore session via backend, falling back to local cache", err);
+            // Network error or offline mode: fall back to cached session if available
+            const activeUser = authService.getCurrentUser();
+            if (activeUser) {
+              setUser(activeUser);
+              const fullProfile = authService.getUserProfile(activeUser.id);
+              setProfile(fullProfile);
+            }
           }
         }
       } else {
@@ -67,6 +87,7 @@ export const AuthProvider = ({ children }) => {
       setUser(loggedUser);
       const fullProfile = authService.getUserProfile(loggedUser.id);
       setProfile(fullProfile);
+      trackAuth("login");
       return loggedUser;
     } finally {
       setLoading(false);
@@ -80,6 +101,7 @@ export const AuthProvider = ({ children }) => {
       setUser(loggedUser);
       const fullProfile = authService.getUserProfile(loggedUser.id);
       setProfile(fullProfile);
+      trackAuth("login");
       return loggedUser;
     } finally {
       setLoading(false);
@@ -93,6 +115,7 @@ export const AuthProvider = ({ children }) => {
       setUser(signedUser);
       const fullProfile = authService.getUserProfile(signedUser.id);
       setProfile(fullProfile);
+      trackAuth("signup");
       return signedUser;
     } finally {
       setLoading(false);
@@ -101,9 +124,13 @@ export const AuthProvider = ({ children }) => {
 
   const logout = async () => {
     setLoading(true);
-    await authService.logout();
-    setUser(null);
-    setProfile(null);
+    try {
+      await authService.logout();
+    } catch (err) {
+      console.error("Logout API call failed:", err);
+    }
+    trackAuth("logout");
+    clearAuthSession();
     setLoading(false);
   };
 

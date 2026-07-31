@@ -7,7 +7,7 @@ export default function BottomNav() {
   const { wishlistCount } = useWishlist();
 
   return (
-    <div className="lg:hidden fixed bottom-0 left-0 right-0 bg-brand-bg/95 dark:bg-[#1A1714]/95 backdrop-blur-md border-t border-brand-border py-2.5 px-6 flex items-center justify-between z-40 shadow-[0_-4px_12px_rgba(0,0,0,0.05)] font-accent">
+    <div className="lg:hidden fixed bottom-0 left-0 right-0 bg-brand-bg/95 backdrop-blur-md border-t border-brand-border py-2.5 px-6 flex items-center justify-between z-40 shadow-[0_-4px_12px_rgba(0,0,0,0.05)] font-accent">
       <NavLink
         to="/"
         className={({ isActive }) =>

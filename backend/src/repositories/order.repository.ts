@@ -7,7 +7,15 @@ export class OrderRepository {
   /**
    * Invoke database-level transaction via Postgres RPC to create an order atomically
    */
-  async createOrderAtomic(userId: string, input: CheckoutInput): Promise<string> {
+  async createOrderAtomic(
+    userId: string,
+    input: CheckoutInput & {
+      tax?: number;
+      coupon_code?: string | null;
+      gift_card_code?: string | null;
+      gift_card_discount?: number;
+    }
+  ): Promise<string> {
     try {
       const { data: orderId, error } = await supabaseAdmin.rpc('create_order_atomic', {
         p_user_id: userId,
@@ -15,6 +23,10 @@ export class OrderRepository {
         p_shipping_address: input.shipping_address,
         p_shipping_fee: input.shipping_fee || 0,
         p_discount: input.discount || 0,
+        p_tax: input.tax || 0,
+        p_coupon_code: input.coupon_code || null,
+        p_gift_card_code: input.gift_card_code || null,
+        p_gift_card_discount: input.gift_card_discount || 0,
       });
 
       if (error) {
@@ -154,6 +166,103 @@ export class OrderRepository {
       if (err instanceof AppError) throw err;
       logger.error(`Unexpected error in updateOrderStatus: ${err}`);
       throw new AppError('Internal server error during order state modifications', 500);
+    }
+  }
+
+  /**
+   * Update payment information details of an existing order
+   */
+  async updateOrderPayment(
+    orderId: string,
+    updates: {
+      status?: OrderStatus;
+      payment_status?: PaymentStatus;
+      razorpay_order_id?: string | null;
+      razorpay_payment_id?: string | null;
+      razorpay_signature?: string | null;
+      payment_method?: string | null;
+      paid_at?: string | null;
+    }
+  ): Promise<Order> {
+    try {
+      const { data, error } = await supabaseAdmin
+        .from('orders')
+        .update(updates)
+        .eq('id', orderId)
+        .select()
+        .single();
+
+      if (error) {
+        logger.error(`Database error updating order payment ${orderId}: ${error.message}`);
+        throw new AppError('Failed to update order payment details', 500);
+      }
+
+      return data as Order;
+    } catch (err) {
+      if (err instanceof AppError) throw err;
+      logger.error(`Unexpected error in updateOrderPayment: ${err}`);
+      throw new AppError('Internal server error during order payment modifications', 500);
+    }
+  }
+
+  /**
+   * Look up order details by Razorpay reference ID
+   */
+  async getOrderByRazorpayOrderId(razorpayOrderId: string): Promise<Order | null> {
+    try {
+      const { data, error } = await supabaseAdmin
+        .from('orders')
+        .select('*, items:order_items(*)')
+        .eq('razorpay_order_id', razorpayOrderId)
+        .single();
+
+      if (error) {
+        if (error.code === 'PGRST116') return null;
+        logger.error(`Database error fetching order by razorpay_order_id ${razorpayOrderId}: ${error.message}`);
+        throw new AppError('Failed to retrieve order by Razorpay reference', 500);
+      }
+
+      return data as Order;
+    } catch (err) {
+      if (err instanceof AppError) throw err;
+      logger.error(`Unexpected error in getOrderByRazorpayOrderId: ${err}`);
+      throw new AppError('Internal server error during order details retrieval', 500);
+    }
+  }
+
+  /**
+   * Update payment information details using Razorpay reference ID
+   */
+  async updateOrderByRazorpayOrderId(
+    razorpayOrderId: string,
+    updates: {
+      status?: OrderStatus;
+      payment_status?: PaymentStatus;
+      razorpay_order_id?: string | null;
+      razorpay_payment_id?: string | null;
+      razorpay_signature?: string | null;
+      payment_method?: string | null;
+      paid_at?: string | null;
+    }
+  ): Promise<Order> {
+    try {
+      const { data, error } = await supabaseAdmin
+        .from('orders')
+        .update(updates)
+        .eq('razorpay_order_id', razorpayOrderId)
+        .select()
+        .single();
+
+      if (error) {
+        logger.error(`Database error updating order by razorpay_order_id ${razorpayOrderId}: ${error.message}`);
+        throw new AppError('Failed to update order details by Razorpay reference', 500);
+      }
+
+      return data as Order;
+    } catch (err) {
+      if (err instanceof AppError) throw err;
+      logger.error(`Unexpected error in updateOrderByRazorpayOrderId: ${err}`);
+      throw new AppError('Internal server error during order payment modifications', 500);
     }
   }
 }

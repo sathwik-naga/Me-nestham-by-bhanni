@@ -4,35 +4,67 @@
 export const mockCategories = [
   {
     id: "cat-1",
-    name: "Handcrafted Jewelry",
-    slug: "jewelry",
-    description: "Elegant, artisan-crafted sterling silver, brass, and terracotta jewelry reflecting Indian heritage.",
-    image: "https://images.unsplash.com/photo-1599643478518-a784e5dc4c8f?auto=format&fit=crop&w=600&q=80",
-    productCount: 42
+    name: "Foam Flowers",
+    slug: "foam-flowers",
+    description: "Vibrant, soft-touch premium foam flower packs for garland making and home accents.",
+    image: "https://images.unsplash.com/photo-1563241527-3004b7be0ffd?auto=format&fit=crop&w=600&q=80",
+    productCount: 24
   },
   {
     id: "cat-2",
-    name: "Artisanal Home Decor",
-    slug: "home-decor",
-    description: "Hand-painted pottery, brass lamps, and handcrafted wooden artifacts to warm up your living space.",
-    image: "https://images.unsplash.com/photo-1616486338812-3dadae4b4ace?auto=format&fit=crop&w=600&q=80",
-    productCount: 35
+    name: "Artificial Flowers",
+    slug: "artificial-flowers",
+    description: "Realistic satin roses and ribbon flower separators with stems for garland craft.",
+    image: "https://images.unsplash.com/photo-1526047932273-341f2a7631f9?auto=format&fit=crop&w=600&q=80",
+    productCount: 18
   },
   {
     id: "cat-3",
-    name: "Heritage Apparel",
-    slug: "apparel",
-    description: "Pure cotton hand-block print sarees, kurtas, and stoles crafted by master weavers.",
-    image: "https://images.unsplash.com/photo-1610030469983-98e550d6193c?auto=format&fit=crop&w=600&q=80",
-    productCount: 28
+    name: "Decorative Balls",
+    slug: "decorative-balls",
+    description: "Gold thread wrapped zari balls in small and large sizes to add a majestic shine.",
+    image: "https://images.unsplash.com/photo-1513519245088-0e12902e5a38?auto=format&fit=crop&w=600&q=80",
+    productCount: 15
   },
   {
     id: "cat-4",
-    name: "Traditional Fine Art",
-    slug: "art",
-    description: "Authentic Madhubani, Pattachitra, and Tanjore paintings handmade by certified national artisans.",
-    image: "https://images.unsplash.com/photo-1579783900882-c0d3dad7b119?auto=format&fit=crop&w=600&q=80",
-    productCount: 15
+    name: "Bells",
+    slug: "bells",
+    description: "Metallic conical filigree bells with hollow designs for traditional hangings.",
+    image: "https://images.unsplash.com/photo-1544717305-2782549b5136?auto=format&fit=crop&w=600&q=80",
+    productCount: 12
+  },
+  {
+    id: "cat-5",
+    name: "Beads",
+    slug: "beads",
+    description: "Ribbed barrel and pumpkin white plastic spacer beads for structuring garlands.",
+    image: "https://images.unsplash.com/photo-1535632066927-ab7c9ab60908?auto=format&fit=crop&w=600&q=80",
+    productCount: 20
+  },
+  {
+    id: "cat-6",
+    name: "Decorative Items",
+    slug: "decorative-items",
+    description: "MDF felt-backed lotus hangings and hand-painted Kamadhenu cow pairs for festivals.",
+    image: "https://images.unsplash.com/photo-1616486338812-3dadae4b4ace?auto=format&fit=crop&w=600&q=80",
+    productCount: 16
+  },
+  {
+    id: "cat-7",
+    name: "Plastic Flower Parts",
+    slug: "plastic-flower-parts",
+    description: "Snowflake, jasmine, lily, and cup-shaped plastic backings and separators for garland framing.",
+    image: "https://images.unsplash.com/photo-1599643478518-a784e5dc4c8f?auto=format&fit=crop&w=600&q=80",
+    productCount: 14
+  },
+  {
+    id: "cat-8",
+    name: "Threads",
+    slug: "threads",
+    description: "Break-resistant cotton garland threads for heavy flower and bead threading.",
+    image: "https://images.unsplash.com/photo-1605886300898-1e42f9e4bd33?auto=format&fit=crop&w=600&q=80",
+    productCount: 10
   }
 ];
 
@@ -328,12 +360,7 @@ export const mockFAQs = [
     question: "Do you ship internationally?",
     answer: "Currently, Me Nestham By Bhanni only ships within India. Standard shipping takes 3-5 business days, and express shipping takes 1-2 business days depending on your location."
   },
-  {
-    id: "faq-3",
-    category: "returns",
-    question: "What is your return and refund policy?",
-    answer: "We support a hassle-free 7-day return policy for unused products in their original packaging. Returns can be initiated from the customer dashboard under 'My Orders' settings. Once approved, reverse pick up is scheduled and the refund is credited to your bank account/source payment within 5-7 working days."
-  },
+
   {
     id: "faq-4",
     category: "payments",

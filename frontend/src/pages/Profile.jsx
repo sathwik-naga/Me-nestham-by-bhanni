@@ -8,7 +8,7 @@ import { db } from "../services/db";
 import ProductCard from "../components/ProductCard";
 import { 
   User, ShoppingBag, Heart, MapPin, Settings, 
-  Trash2, Edit3, Save, Phone, Mail, Award, CheckCircle2
+  Trash2, Edit3, Save, Phone, Award, CheckCircle2
 } from "lucide-react";
 
 export default function Profile() {
@@ -17,8 +17,7 @@ export default function Profile() {
   const tabParam = searchParams.get("tab") || "profile";
 
   const { user, profile, updateProfile, saveAddress, deleteAddress, logout } = useAuth();
-  const { wishlist, toggleWishlist } = useWishlist();
-  const { addToCart } = useCart();
+  const { wishlist } = useWishlist();
 
   const [activeTab, setActiveTab] = useState(tabParam);
   
@@ -199,7 +198,7 @@ export default function Profile() {
               className={`flex items-center gap-3 px-4 py-3.5 rounded-xl text-xs font-semibold transition-all ${
                 activeTab === item.id 
                   ? "bg-brand-primary text-white shadow-sm font-bold" 
-                  : "text-brand-text hover:bg-brand-secondary hover:dark:bg-[#25211E]"
+                  : "text-brand-text hover:bg-brand-secondary"
               }`}
             >
               {item.icon} {item.label}

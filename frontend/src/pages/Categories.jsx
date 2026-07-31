@@ -2,12 +2,24 @@ import React from "react";
 import { Link } from "react-router-dom";
 import { db } from "../services/db";
 import { motion } from "framer-motion";
+import SEO from "../components/SEO/SEO";
+import { generateBreadcrumbSchema } from "../utils/seo";
 
 export default function Categories() {
   const categories = db.getCategories();
+  const breadcrumbsSchema = generateBreadcrumbSchema([
+    { name: "Home", url: "/" },
+    { name: "Categories", url: "/categories" }
+  ]);
 
   return (
     <div className="max-w-7xl mx-auto px-6 md:px-12 py-10 font-accent flex flex-col text-left">
+      <SEO
+        title="Product Categories"
+        description="Explore product categories for artificial flower petals, garland raw materials, decoration items, and craft supplies at Me Nestham by Bhanni."
+        keywords="Flower Categories, Garland Materials, Artificial Petals, Craft Supplies"
+        jsonLd={breadcrumbsSchema}
+      />
       {/* Breadcrumbs */}
       <div className="text-xs text-brand-text-muted mb-6">
         <Link to="/" className="hover:text-brand-primary">Home</Link>

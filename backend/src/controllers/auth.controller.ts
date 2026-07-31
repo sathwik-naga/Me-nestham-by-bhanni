@@ -95,4 +95,80 @@ export class AuthController {
       next(error);
     }
   }
+
+  /**
+   * GET /api/auth/users (Admin Only)
+   */
+  async listUsers(req: Request, res: Response, next: NextFunction): Promise<void> {
+    try {
+      if (!req.user || req.user.role !== 'admin') {
+        throw new AppError('Forbidden: Access is denied for this user role', 403);
+      }
+
+      const users = await userRepository.listAllUsers();
+
+      res.status(200).json({
+        status: 'success',
+        results: users.length,
+        data: {
+          users: users.map((u) => ({
+            id: u.id,
+            email: u.email,
+            phone: u.phone || '',
+            role: u.app_metadata?.role || 'customer',
+            name: u.user_metadata?.full_name || u.email?.split('@')[0] || 'User',
+            created_at: u.created_at,
+          })),
+        },
+      });
+    } catch (error) {
+      next(error);
+    }
+  }
+
+  /**
+   * POST /api/auth/forgot-password
+   */
+  async forgotPassword(req: Request, res: Response, next: NextFunction): Promise<void> {
+    try {
+      const { email } = req.body;
+      if (!email) {
+        throw new AppError('Email address is required', 400);
+      }
+
+      await authService.forgotPassword(email);
+
+      res.status(200).json({
+        status: 'success',
+        message: "If an account exists for that email address, we've sent password reset instructions.",
+      });
+    } catch (error) {
+      next(error);
+    }
+  }
+
+  /**
+   * POST /api/auth/reset-password
+   */
+  async resetPassword(req: Request, res: Response, next: NextFunction): Promise<void> {
+    try {
+      const { password } = req.body;
+      if (!password) {
+        throw new AppError('Password is required', 400);
+      }
+
+      if (!req.user) {
+        throw new AppError('Unauthorized: Active user session not found', 401);
+      }
+
+      await authService.resetPassword(req.user.id, password);
+
+      res.status(200).json({
+        status: 'success',
+        message: 'Password has been reset successfully.',
+      });
+    } catch (error) {
+      next(error);
+    }
+  }
 }

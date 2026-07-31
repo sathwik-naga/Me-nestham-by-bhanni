@@ -18,14 +18,44 @@ export interface ProductImage {
   created_at: string;
 }
 
+export interface VariantOption {
+  option_name: string;
+  option_value: string;
+}
+
+export interface VariantImage {
+  id: string;
+  variant_id: string;
+  storage_path?: string | null;
+  image_url: string;
+  media_type?: string;
+  alt_text?: string | null;
+  sort_order: number;
+  is_primary: boolean;
+  position?: number;
+  created_at?: string;
+}
+
 export interface ProductVariant {
   id: string;
   product_id: string;
   sku: string;
-  name: string;
+  variant_name?: string; // Database column name in product_variants table
+  name?: string;         // Virtual/Mapped property for API & frontend convenience
   price: number;
-  stock_quantity: number;
+  sale_price?: number | null;
+  stock?: number;
+  stock_quantity?: number;
+  weight?: number | null;
+  is_default?: boolean;
+  status?: string;
   created_at: string;
+  updated_at?: string;
+  options?: VariantOption[];
+  images?: VariantImage[];
+  size?: string | null;
+  color?: string | null;
+  material?: string | null;
 }
 
 export interface Product {

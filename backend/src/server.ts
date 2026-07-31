@@ -1,18 +1,41 @@
 import app from './app';
 import env from './config/env';
 import logger from './utils/logger';
+import { checkDatabaseHealth } from './utils/dbHealthCheck';
 
-const server = app.listen(env.PORT, () => {
-  logger.info(`⚡️ Server is running at http://localhost:${env.PORT} in ${env.NODE_ENV} mode`);
-});
+let server: any;
+
+export const bootstrap = async (): Promise<void> => {
+  if (server) {
+    logger.warn('Server already started – ignoring duplicate bootstrap call.');
+    return;
+  }
+  try {
+    await checkDatabaseHealth();
+  } catch (err) {
+    logger.error(`Database health check failed: ${err}`);
+  }
+
+  server = app.listen(env.PORT, () => {
+    logger.info(`⚡️ Server is running at http://localhost:${env.PORT} in ${env.NODE_ENV} mode`);
+  });
+};
+
+if (require.main === module) {
+  bootstrap();
+}
 
 // Handle unhandled promise rejections
 process.on('unhandledRejection', (err: Error) => {
   logger.error(`UNHANDLED REJECTION! 💥 Shutting down...`);
   logger.error(err.stack || err.message);
-  server.close(() => {
+  if (server) {
+    server.close(() => {
+      process.exit(1);
+    });
+  } else {
     process.exit(1);
-  });
+  }
 });
 
 // Handle uncaught exceptions
@@ -25,10 +48,14 @@ process.on('uncaughtException', (err: Error) => {
 // Handle graceful shutdown on system termination signals
 const gracefulShutdown = (signal: string) => {
   logger.info(`Received ${signal}. Shutting down gracefully...`);
-  server.close(() => {
-    logger.info('Process terminated.');
+  if (server) {
+    server.close(() => {
+      logger.info('Process terminated.');
+      process.exit(0);
+    });
+  } else {
     process.exit(0);
-  });
+  }
 };
 
 process.on('SIGTERM', () => gracefulShutdown('SIGTERM'));

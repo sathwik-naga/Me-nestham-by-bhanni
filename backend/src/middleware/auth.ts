@@ -1,9 +1,11 @@
 import { Request, Response, NextFunction } from 'express';
 import { UserRepository } from '../repositories/user.repository';
+import { ProfileRepository } from '../repositories/profile.repository';
 import { AppError } from './error';
 import logger from '../utils/logger';
 
 const userRepository = new UserRepository();
+const profileRepository = new ProfileRepository();
 
 /**
  * Middleware to protect routes and verify the Supabase JWT
@@ -32,14 +34,14 @@ export const authMiddleware = async (
       throw new AppError('Authorization denied: Invalid or expired session token', 401);
     }
 
-    // Retrieve role directly from verified Supabase Auth JWT app_metadata
-    const role = (user.app_metadata?.role as 'customer' | 'admin') || 'customer';
+    // After verifying the JWT, fetch the user's profile from the profiles table
+    const profile = await profileRepository.getById(user.id);
 
     // Attach verified user credentials to Request object
     req.user = {
       id: user.id,
       email: user.email || '',
-      role,
+      role: profile?.role || 'customer',
     };
 
     next();

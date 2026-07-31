@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import { Link } from "react-router-dom";
+import logo from "../assets/logo.jpeg";
 import { Send, Instagram, Facebook, Youtube, ShieldCheck } from "lucide-react";
 
 export default function Footer() {
@@ -16,17 +17,20 @@ export default function Footer() {
   };
 
   return (
-    <footer className="bg-brand-secondary dark:bg-[#151210] border-t border-brand-border mt-auto pt-16 pb-8 font-accent">
+    <footer className="bg-brand-secondary border-t border-brand-border mt-auto pt-16 pb-8 font-accent">
       <div className="max-w-7xl mx-auto px-6 md:px-12 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-12 mb-16">
         
         {/* Brand Narrative Column */}
         <div className="lg:col-span-2">
           <Link to="/" className="flex items-center gap-2 mb-4">
-            <img src="/src/assets/logo.svg" alt="Me Nestham Logo" className="w-8 h-8" />
-            <span className="font-serif text-xl font-bold tracking-tight text-brand-primary">Me Nestham</span>
+            <img src={logo} alt="Me Nestham by Bhanni Logo" className="w-9 h-9 rounded-full object-cover shadow-sm" />
+            <div className="flex flex-col">
+              <span className="font-serif text-xl font-bold tracking-tight text-brand-primary">Me Nestham</span>
+              <span className="text-[9px] uppercase tracking-widest text-brand-text-muted font-bold">By Bhanni</span>
+            </div>
           </Link>
           <p className="text-xs text-brand-text-muted leading-relaxed max-w-sm mb-6">
-            Me Nestham By Bhanni is a premium destination for authentic Indian handicrafts, heritage textiles, fine traditional arts, and handmade jewelry. We partner directly with artisan cooperatives to ensure fair trade and sustain legacy crafts.
+            Me Nestham by Bhanni is your premium destination for garland raw materials, artificial flower petals, decoration supplies, wedding accessories and craft materials.
           </p>
           <div className="flex items-center gap-4 text-brand-text-muted">
             <a href="https://instagram.com" target="_blank" rel="noreferrer" className="hover:text-brand-primary transition-colors" aria-label="Instagram">
@@ -46,10 +50,12 @@ export default function Footer() {
           <h4 className="font-serif text-sm font-bold text-brand-primary mb-5">Quick Shop</h4>
           <ul className="flex flex-col gap-3 text-xs text-brand-text hover:text-brand-primary transition-colors">
             <li><Link to="/shop" className="hover:text-brand-primary hover:underline">All Collections</Link></li>
-            <li><Link to="/categories/jewelry" className="hover:text-brand-primary hover:underline">Handcrafted Jewelry</Link></li>
-            <li><Link to="/categories/home-decor" className="hover:text-brand-primary hover:underline">Artisanal Decor</Link></li>
-            <li><Link to="/categories/apparel" className="hover:text-brand-primary hover:underline">Heritage Apparel</Link></li>
-            <li><Link to="/categories/art" className="hover:text-brand-primary hover:underline">Fine Traditional Art</Link></li>
+            <li><Link to="/categories/foam-flowers" className="hover:text-brand-primary hover:underline">Foam Flowers</Link></li>
+            <li><Link to="/categories/artificial-flowers" className="hover:text-brand-primary hover:underline">Artificial Flowers</Link></li>
+            <li><Link to="/categories/decorative-balls" className="hover:text-brand-primary hover:underline">Decorative Balls</Link></li>
+            <li><Link to="/categories/bells" className="hover:text-brand-primary hover:underline">Filigree Bells</Link></li>
+            <li><Link to="/categories/beads" className="hover:text-brand-primary hover:underline">Garland Beads</Link></li>
+            <li><Link to="/categories/decorative-items" className="hover:text-brand-primary hover:underline">Decorative Items</Link></li>
           </ul>
         </div>
 
@@ -61,7 +67,6 @@ export default function Footer() {
             <li><Link to="/faq" className="hover:text-brand-primary hover:underline">FAQ Help Center</Link></li>
             <li><Link to="/profile?tab=orders" className="hover:text-brand-primary hover:underline">Order Tracking</Link></li>
             <li><Link to="/policies/shipping" className="hover:text-brand-primary hover:underline">Shipping Policy</Link></li>
-            <li><Link to="/policies/returns" className="hover:text-brand-primary hover:underline">Return & Exchange Policy</Link></li>
           </ul>
         </div>
 
@@ -78,7 +83,7 @@ export default function Footer() {
               required
               value={email}
               onChange={(e) => setEmail(e.target.value)}
-              className="w-full bg-brand-bg dark:bg-[#1A1714] text-brand-text border border-brand-border px-4 py-3 rounded-lg outline-none focus:border-brand-primary text-xs pr-10"
+              className="w-full bg-brand-bg text-brand-text border border-brand-border px-4 py-3 rounded-lg outline-none focus:border-brand-primary text-xs pr-10"
             />
             <button
               type="submit"
@@ -109,8 +114,6 @@ export default function Footer() {
           <Link to="/policies/terms" className="hover:underline">Terms &amp; Conditions</Link>
           <span>|</span>
           <Link to="/policies/shipping" className="hover:underline">Shipping</Link>
-          <span>|</span>
-          <Link to="/policies/returns" className="hover:underline">Returns</Link>
         </div>
 
         {/* Payment logos */}

@@ -2,6 +2,8 @@ import React, { useState } from "react";
 import { Link } from "react-router-dom";
 import { mockFAQs } from "../data/mockProducts";
 import { HelpCircle, Search, MessageSquare, ChevronDown } from "lucide-react";
+import SEO from "../components/SEO/SEO";
+import { generateFaqSchema, generateBreadcrumbSchema } from "../utils/seo";
 
 export default function FAQ() {
   const [searchQuery, setSearchQuery] = useState("");
@@ -17,8 +19,21 @@ export default function FAQ() {
     return matchesSearch && matchesCategory;
   });
 
+  const faqSchema = generateFaqSchema(mockFAQs);
+  const breadcrumbsSchema = generateBreadcrumbSchema([
+    { name: "Home", url: "/" },
+    { name: "FAQs", url: "/faq" }
+  ]);
+  const jsonLd = [faqSchema, breadcrumbsSchema];
+
   return (
     <div className="max-w-4xl mx-auto px-6 py-12 font-accent text-left">
+      <SEO
+        title="Frequently Asked Questions (FAQ)"
+        description="Find answers to common questions about ordering, shipping, customization, and returns at Me Nestham by Bhanni."
+        keywords="FAQ, Help Center, Me Nestham FAQs, Shipping Questions"
+        jsonLd={jsonLd}
+      />
       {/* Breadcrumbs */}
       <div className="text-xs text-brand-text-muted mb-8">
         <Link to="/" className="hover:text-brand-primary">Home</Link>
@@ -55,7 +70,6 @@ export default function FAQ() {
           <option value="all">All Topics</option>
           <option value="orders">Orders &amp; Tracking</option>
           <option value="shipping">Shipping Delivery</option>
-          <option value="returns">Returns &amp; Refund</option>
           <option value="payments">Online Payments</option>
           <option value="products">Artisan Products</option>
         </select>
@@ -86,7 +100,7 @@ export default function FAQ() {
       </div>
 
       {/* WhatsApp human support ticket option */}
-      <div className="bg-brand-secondary dark:bg-[#201D1B] border border-brand-border p-6 rounded-3xl text-center flex flex-col items-center gap-3">
+      <div className="bg-brand-secondary border border-brand-border p-6 rounded-3xl text-center flex flex-col items-center gap-3">
         <h3 className="font-serif font-bold text-sm text-brand-text">Still have unanswered questions?</h3>
         <p className="text-xs text-brand-text-muted max-w-sm mb-2 leading-relaxed">
           If you can't find answers in our FAQs, you can connect directly with our support team on WhatsApp. We are online from 9 AM to 6 PM IST.
@@ -95,7 +109,7 @@ export default function FAQ() {
           href="https://wa.me/919999999999?text=Hi, I have a question not covered in FAQs."
           target="_blank"
           rel="noreferrer"
-          className="bg-brand-success text-white text-xs font-semibold px-6 py-3 rounded-xl hover:bg-[#3D694B] shadow flex items-center gap-1.5"
+          className="bg-brand-success text-white text-xs font-semibold px-6 py-3 rounded-xl hover:opacity-90 transition-all shadow flex items-center gap-1.5 cursor-pointer"
         >
           <MessageSquare size={14} /> Connect on WhatsApp
         </a>

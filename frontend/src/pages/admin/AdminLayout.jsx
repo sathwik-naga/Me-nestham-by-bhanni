@@ -1,15 +1,18 @@
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import { Link, Outlet, useLocation, useNavigate } from "react-router-dom";
+import logo from "../../assets/logo.jpeg";
 import { useAuth } from "../../context/AuthContext";
+import { api } from "../../services/api";
 import { 
   LayoutDashboard, ShoppingBag, FolderTree, ClipboardList, 
-  Users, Tag, ShieldAlert, BarChart3, LogOut, ArrowLeft, User
+  Users, Tag, ShieldAlert, BarChart3, LogOut, ArrowLeft, User, Mail, MessageCircle
 } from "lucide-react";
 
 export default function AdminLayout() {
   const { user, isAdmin, logout } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
+  const [unreadContactCount, setUnreadContactCount] = useState(0);
 
   // Route-gating: Admin role protection
   useEffect(() => {
@@ -21,6 +24,17 @@ export default function AdminLayout() {
     }
   }, [user, isAdmin, navigate]);
 
+  // Fetch unread contact message count for badge
+  useEffect(() => {
+    if (user && isAdmin) {
+      api.get("/admin/contact-messages/unread-count")
+        .then((res) => {
+          if (res?.success) setUnreadContactCount(res.count || 0);
+        })
+        .catch(() => {});
+    }
+  }, [user, isAdmin, location.pathname]);
+
   if (!user || !isAdmin) return null;
 
   const adminMenu = [
@@ -28,9 +42,11 @@ export default function AdminLayout() {
     { path: "/admin/products", label: "Products", icon: <ShoppingBag size={16} /> },
     { path: "/admin/categories", label: "Categories", icon: <FolderTree size={16} /> },
     { path: "/admin/orders", label: "Orders", icon: <ClipboardList size={16} /> },
+    { path: "/admin/contact-messages", label: "Contact Messages", icon: <MessageCircle size={16} />, badge: unreadContactCount },
     { path: "/admin/customers", label: "Customers", icon: <Users size={16} /> },
     { path: "/admin/coupons", label: "Coupons", icon: <Tag size={16} /> },
     { path: "/admin/inventory", label: "Inventory", icon: <ShieldAlert size={16} /> },
+    { path: "/admin/emails", label: "Email Logs", icon: <Mail size={16} /> },
     { path: "/admin/analytics", label: "Analytics", icon: <BarChart3 size={16} /> }
   ];
 
@@ -40,17 +56,17 @@ export default function AdminLayout() {
   };
 
   return (
-    <div className="min-h-screen flex bg-brand-secondary dark:bg-[#151210] font-accent text-left">
+    <div className="min-h-screen flex bg-brand-secondary  font-accent text-left">
       {/* Sidebar Navigation */}
       <aside className="w-64 bg-brand-card border-r border-brand-border shrink-0 hidden md:flex flex-col justify-between py-6">
         <div>
           {/* Header logo */}
           <div className="px-6 mb-8">
-            <Link to="/" className="flex items-center gap-2">
-              <img src="/src/assets/logo.svg" alt="Me Nestham Logo" className="w-8 h-8" />
+            <Link to="/" className="flex items-center gap-3">
+              <img src={logo} alt="Me Nestham by Bhanni Logo" className="w-9 h-9 rounded-full object-cover shadow-sm" />
               <div className="flex flex-col">
-                <span className="font-serif text-base font-bold text-brand-primary">Bhanni Admin</span>
-                <span className="text-[8px] uppercase tracking-widest text-brand-text-muted font-bold">Management Portal</span>
+                <span className="font-serif text-base font-bold text-brand-primary">Me Nestham</span>
+                <span className="text-[8px] uppercase tracking-widest text-brand-text-muted font-bold">Admin Portal</span>
               </div>
             </Link>
           </div>
@@ -66,13 +82,22 @@ export default function AdminLayout() {
                 <Link
                   key={item.path}
                   to={item.path}
-                  className={`flex items-center gap-3 px-4 py-3 rounded-xl text-xs font-semibold transition-all ${
+                  className={`flex items-center justify-between px-4 py-3 rounded-xl text-xs font-semibold transition-all ${
                     isActive
                       ? "bg-brand-primary text-white font-bold shadow-md"
-                      : "text-brand-text hover:bg-brand-secondary hover:dark:bg-[#2D2723]"
+                      : "text-brand-text hover:bg-brand-secondary "
                   }`}
                 >
-                  {item.icon} {item.label}
+                  <div className="flex items-center gap-3">
+                    {item.icon} {item.label}
+                  </div>
+                  {item.badge > 0 && (
+                    <span className={`px-2 py-0.5 text-[10px] font-bold rounded-full ${
+                      isActive ? "bg-white text-brand-primary" : "bg-amber-500 text-white"
+                    }`}>
+                      {item.badge}
+                    </span>
+                  )}
                 </Link>
               );
             })}
@@ -83,7 +108,7 @@ export default function AdminLayout() {
         <div className="px-3 flex flex-col gap-2">
           <Link 
             to="/" 
-            className="flex items-center gap-3 px-4 py-3 rounded-xl text-xs font-semibold text-brand-text hover:bg-brand-secondary hover:dark:bg-[#2D2723]"
+            className="flex items-center gap-3 px-4 py-3 rounded-xl text-xs font-semibold text-brand-text hover:bg-brand-secondary "
           >
             <ArrowLeft size={16} /> Back to Storefront
           </Link>
@@ -105,12 +130,25 @@ export default function AdminLayout() {
              location.pathname.startsWith("/admin/products") ? "Product Management" : 
              location.pathname.startsWith("/admin/categories") ? "Categories Hub" :
              location.pathname.startsWith("/admin/orders") ? "Order Center" : 
+             location.pathname.startsWith("/admin/contact-messages") ? "Contact Messages" :
              location.pathname.startsWith("/admin/customers") ? "Customer Directory" : 
              location.pathname.startsWith("/admin/coupons") ? "Promo Coupons" :
-             location.pathname.startsWith("/admin/inventory") ? "Inventory Control" : "Analytics Suite"}
+             location.pathname.startsWith("/admin/inventory") ? "Inventory Control" : 
+             location.pathname.startsWith("/admin/emails") ? "System Email Logs" : "Analytics Suite"}
           </h2>
 
           <div className="flex items-center gap-4 text-xs font-semibold">
+            {unreadContactCount > 0 && (
+              <Link
+                to="/admin/contact-messages"
+                className="flex items-center gap-1.5 bg-amber-500/10 border border-amber-500/30 text-amber-600 px-3 py-1.5 rounded-full hover:bg-amber-500/20 transition-colors"
+                title={`${unreadContactCount} unread contact messages`}
+              >
+                <MessageCircle size={14} />
+                <span className="font-bold text-[11px]">{unreadContactCount} New</span>
+              </Link>
+            )}
+
             <span className="text-[10px] text-brand-text-muted">Role: <span className="font-bold text-brand-accent uppercase bg-brand-secondary px-2 py-0.5 rounded border">{user.role}</span></span>
             <div className="flex items-center gap-2 border-l border-brand-border pl-4">
               <User size={16} className="text-brand-primary" />
@@ -127,3 +165,4 @@ export default function AdminLayout() {
     </div>
   );
 }
+

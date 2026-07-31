@@ -2,6 +2,7 @@ import React, { createContext, useContext, useState, useEffect } from "react";
 import { useAuth } from "./AuthContext";
 import { db } from "../services/db";
 import { api } from "../services/api";
+import { trackAddToCart, trackRemoveFromCart } from "../services/analytics/analytics";
 
 const CartContext = createContext();
 
@@ -13,67 +14,150 @@ export const CartProvider = ({ children }) => {
 
   // Helper to map backend cart items to the frontend structure
   const mapBackendCartItems = (items) => {
-    return items.map((item) => ({
-      id: item.product_id, // frontend uses item.id as the product ID
-      cartItemId: item.id, // backend cart item ID to update/remove
-      name: item.product?.name || "Product",
-      slug: item.product?.slug || "",
-      image: item.product?.featured_image || item.product?.image_url || "/placeholder.png",
-      price: Number(item.product?.price || 0),
-      variant: "", // backend doesn't support variants
-      quantity: item.quantity,
-      maxStock: item.product?.stock || 0,
-    }));
+    return items.map((item) => {
+      const isVariant = !!item.variant;
+      const variantName = item.variant?.name || "";
+      const price = isVariant
+        ? Number(item.variant.sale_price !== null && item.variant.sale_price !== undefined ? item.variant.sale_price : item.variant.price)
+        : Number(item.product?.price || 0);
+      const maxStock = isVariant
+        ? (item.variant.stock !== undefined ? item.variant.stock : (item.variant.stock_quantity || 0))
+        : (item.product?.stock || 0);
+
+      let image = "/placeholder.png";
+      if (isVariant && item.variant.images && item.variant.images.length > 0) {
+        const primaryImg = item.variant.images.find((img) => typeof img === 'object' && img.is_primary);
+        image = primaryImg ? (primaryImg.image_url || primaryImg.url) : (typeof item.variant.images[0] === 'string' ? item.variant.images[0] : item.variant.images[0].image_url);
+      } else {
+        image = item.product?.featured_image || item.product?.image_url || "/placeholder.png";
+      }
+
+      return {
+        id: item.product_id,
+        variantId: item.variant_id || null,
+        cartItemId: item.id,
+        name: item.product?.name || "Product",
+        slug: item.product?.slug || "",
+        image,
+        price,
+        variant: variantName,
+        quantity: item.quantity,
+        maxStock,
+      };
+    });
   };
+
+  const [totals, setTotals] = useState({
+    subtotal: 0,
+    discount: 0,
+    shipping: 0,
+    tax: 0,
+    giftCardDiscount: 0,
+    total: 0,
+  });
+  const [appliedGiftCard, setAppliedGiftCard] = useState(null);
+  const [giftCardError, setGiftCardError] = useState("");
+
+  const updateCartState = (cartResponse) => {
+    if (!cartResponse || !cartResponse.cart) return;
+    const { items, summary } = cartResponse.cart;
+    setCartItems(mapBackendCartItems(items));
+    setTotals({
+      subtotal: Number(summary.subtotal || 0),
+      discount: Number(summary.discount || 0),
+      shipping: Number(summary.shipping || 0),
+      tax: Number(summary.tax || 0),
+      giftCardDiscount: Number(summary.giftCardDiscount || 0),
+      total: Number(summary.grandTotal || 0),
+    });
+
+    if (summary.couponCode) {
+      setAppliedCoupon({ code: summary.couponCode });
+    } else {
+      setAppliedCoupon(null);
+    }
+    if (summary.giftCardCode) {
+      setAppliedGiftCard({ code: summary.giftCardCode });
+    } else {
+      setAppliedGiftCard(null);
+    }
+  };
+
+  // Listen to global logout event
+  useEffect(() => {
+    const handleAuthLogout = () => {
+      // Return cart to guest mode by loading the guest cart (preserving it)
+      const savedCart = localStorage.getItem("mn_cart_guest");
+      setCartItems(savedCart ? JSON.parse(savedCart) : []);
+      setTotals({
+        subtotal: 0,
+        discount: 0,
+        shipping: 0,
+        tax: 0,
+        giftCardDiscount: 0,
+        total: 0,
+      });
+      setAppliedCoupon(null);
+      setAppliedGiftCard(null);
+      setCouponError("");
+      setGiftCardError("");
+    };
+    window.addEventListener("mn-auth-logout", handleAuthLogout);
+    return () => window.removeEventListener("mn-auth-logout", handleAuthLogout);
+  }, []);
 
   // Load cart on mount or when user changes
   useEffect(() => {
     const loadCart = async () => {
-      if (user) {
-        // Authenticated user
-        const token = localStorage.getItem("access_token");
-        if (token) {
-          try {
-            // First check if there are guest cart items to merge
-            const guestCartStr = localStorage.getItem("mn_cart_guest");
-            if (guestCartStr) {
-              const guestCart = JSON.parse(guestCartStr);
-              if (guestCart.length > 0) {
-                // Post items to backend sequentially
-                for (const item of guestCart) {
-                  try {
-                    await api.post("/cart/items", {
-                      product_id: item.id,
-                      quantity: item.quantity,
-                    });
-                  } catch (err) {
-                    console.error("Failed to merge cart item:", err);
-                  }
+      if (!user) {
+        // Return immediately if unauthenticated, strictly load local guest cart
+        const savedCart = localStorage.getItem("mn_cart_guest");
+        setCartItems(savedCart ? JSON.parse(savedCart) : []);
+        setAppliedCoupon(null);
+        setAppliedGiftCard(null);
+        setCouponError("");
+        setGiftCardError("");
+        return;
+      }
+
+      // Authenticated user
+      const token = localStorage.getItem("access_token");
+      if (token) {
+        try {
+          // First check if there are guest cart items to merge
+          const guestCartStr = localStorage.getItem("mn_cart_guest");
+          if (guestCartStr) {
+            const guestCart = JSON.parse(guestCartStr);
+            if (guestCart.length > 0) {
+              // Post items to backend sequentially
+              for (const item of guestCart) {
+                try {
+                  await api.post("/cart/items", {
+                    product_id: item.id,
+                    quantity: item.quantity,
+                    variant_id: item.variantId || null,
+                  });
+                } catch (err) {
+                  console.error("Failed to merge cart item:", err);
                 }
               }
-              localStorage.removeItem("mn_cart_guest");
             }
- 
-            // Fetch the updated cart from backend
-            const result = await api.get("/cart");
-            if (result) {
-              setCartItems(mapBackendCartItems(result.data.cart.items));
-            }
-          } catch (err) {
-            console.error("Failed to load user cart from backend:", err);
+            localStorage.removeItem("mn_cart_guest");
           }
-        }
-      } else {
-        // Guest user
-        const savedCart = localStorage.getItem("mn_cart_guest");
-        if (savedCart) {
-          setCartItems(JSON.parse(savedCart));
-        } else {
-          setCartItems([]);
+
+          // Fetch the updated cart from backend
+          const result = await api.get("/cart");
+          if (result) {
+            updateCartState(result.data);
+          }
+        } catch (err) {
+          console.error("Failed to load user cart from backend:", err);
         }
       }
       setAppliedCoupon(null);
+      setAppliedGiftCard(null);
       setCouponError("");
+      setGiftCardError("");
     };
 
     loadCart();
@@ -86,15 +170,16 @@ export const CartProvider = ({ children }) => {
   };
 
   // Add to cart
-  const addToCart = async (product, quantity = 1, variantName = "") => {
+  const addToCart = async (product, quantity = 1, variantName = "", variantId = null, customImage = null) => {
     if (user) {
       try {
         const result = await api.post("/cart/items", {
           product_id: product.id,
           quantity: quantity,
+          variant_id: variantId || null,
         });
- 
-        setCartItems(mapBackendCartItems(result.data.cart.items));
+
+        updateCartState(result.data);
       } catch (err) {
         alert(err.message || "Error adding item to cart");
       }
@@ -105,50 +190,80 @@ export const CartProvider = ({ children }) => {
       let price = product.price;
 
       if (product.variants && product.variants.length > 0) {
-        if (!selectedVariantName) {
+        if (!selectedVariantName && !variantId) {
           selectedVariantName = product.variants[0].name;
           price = product.variants[0].price;
+        } else if (variantId) {
+          const v = product.variants.find((v) => v.id === variantId);
+          if (v) {
+            selectedVariantName = v.name;
+            price = v.price;
+          }
         } else {
           const v = product.variants.find((v) => v.name === selectedVariantName);
           if (v) price = v.price;
         }
       }
 
+      const selectedVariantId = variantId || (product.variants && selectedVariantName 
+        ? product.variants.find(v => v.name === selectedVariantName)?.id
+        : null);
+
+      let snapshotImage = customImage;
+      if (!snapshotImage && selectedVariantId && product.variants) {
+        const v = product.variants.find((v) => v.id === selectedVariantId);
+        if (v && v.images && v.images.length > 0) {
+          const prim = v.images.find(i => typeof i === 'object' && i.is_primary);
+          snapshotImage = prim ? (prim.image_url || prim.url) : (typeof v.images[0] === 'string' ? v.images[0] : v.images[0].image_url);
+        }
+      }
+      if (!snapshotImage) {
+        snapshotImage = product.images?.[0] || product.image || "/placeholder.png";
+      }
+
       const existingIndex = items.findIndex(
-        (item) => item.id === product.id && item.variant === selectedVariantName
+        (item) => item.id === product.id && item.variantId === selectedVariantId
       );
 
       if (existingIndex >= 0) {
         items[existingIndex].quantity += quantity;
+        if (snapshotImage) items[existingIndex].image = snapshotImage;
       } else {
         items.push({
           id: product.id,
+          variantId: selectedVariantId,
           name: product.name,
           slug: product.slug,
-          image: product.images?.[0] || product.image || "/placeholder.png",
+          image: snapshotImage,
           price: price,
           variant: selectedVariantName,
           quantity: quantity,
-          maxStock: product.variants && selectedVariantName
-            ? (product.variants.find((v) => v.name === selectedVariantName)?.stock || 0)
+          maxStock: product.variants && selectedVariantId
+            ? (product.variants.find((v) => v.id === selectedVariantId)?.stock || 0)
             : product.stockCount,
         });
       }
 
       saveGuestCart(items);
     }
+    trackAddToCart(product, quantity);
   };
 
   // Remove from cart
   const removeFromCart = async (productId, variantName = "") => {
+    const targetItem = cartItems.find((i) => i.id === productId && i.variant === variantName);
+    if (targetItem) {
+      trackRemoveFromCart(targetItem);
+    }
+
     if (user) {
-      const item = cartItems.find((i) => i.id === productId);
+      const item = cartItems.find((i) => i.id === productId && i.variant === variantName);
       if (!item || !item.cartItemId) return;
 
       try {
         const result = await api.delete(`/cart/items/${item.cartItemId}`);
- 
-        setCartItems(mapBackendCartItems(result.data.cart.items));
+
+        updateCartState(result.data);
       } catch (err) {
         alert(err.message || "Error removing item");
       }
@@ -163,13 +278,13 @@ export const CartProvider = ({ children }) => {
   // Update item quantity
   const updateQuantity = async (productId, variantName = "", quantity) => {
     if (user) {
-      const item = cartItems.find((i) => i.id === productId);
+      const item = cartItems.find((i) => i.id === productId && i.variant === variantName);
       if (!item || !item.cartItemId) return;
 
       try {
         const result = await api.put(`/cart/items/${item.cartItemId}`, { quantity });
- 
-        setCartItems(mapBackendCartItems(result.data.cart.items));
+
+        updateCartState(result.data);
       } catch (err) {
         alert(err.message || "Error updating quantity");
       }
@@ -198,50 +313,87 @@ export const CartProvider = ({ children }) => {
       saveGuestCart([]);
     }
     setAppliedCoupon(null);
+    setAppliedGiftCard(null);
+    setTotals({
+      subtotal: 0,
+      discount: 0,
+      shipping: 0,
+      tax: 0,
+      giftCardDiscount: 0,
+      total: 0,
+    });
   };
 
   // Apply discount coupon
-  const applyCoupon = (code) => {
+  const applyCoupon = async (code) => {
+    if (!user) return false;
     setCouponError("");
-    const coupons = db.getCoupons();
-    const coupon = coupons.find((c) => c.code.toUpperCase() === code.toUpperCase());
-
-    if (!coupon) {
-      setCouponError("Invalid coupon code.");
+    try {
+      const response = await api.post("/promotions/apply", { code });
+      if (response.data.status === "success") {
+        const cartRes = await api.get("/cart");
+        updateCartState(cartRes.data);
+        return true;
+      }
+    } catch (err) {
+      setCouponError(err.response?.data?.message || err.message || "Failed to apply coupon.");
       return false;
     }
+  };
 
-    const sub = subtotal;
-    if (sub < coupon.minOrderValue) {
-      setCouponError(`Minimum order value of ₹${coupon.minOrderValue} required for this coupon.`);
+  const removeCoupon = async () => {
+    if (!user) return;
+    try {
+      await api.post("/promotions/remove");
+      const cartRes = await api.get("/cart");
+      updateCartState(cartRes.data);
+    } catch (err) {
+      console.error("Failed to remove coupon", err);
+    }
+  };
+
+  // Gift Card application
+  const applyGiftCard = async (code) => {
+    if (!user) return false;
+    setGiftCardError("");
+    try {
+      const response = await api.post("/promotions/gift-cards/apply", { code });
+      if (response.data.status === "success") {
+        const cartRes = await api.get("/cart");
+        updateCartState(cartRes.data);
+        return true;
+      }
+    } catch (err) {
+      setGiftCardError(err.response?.data?.message || err.message || "Failed to apply gift card.");
       return false;
     }
-
-    setAppliedCoupon(coupon);
-    return true;
   };
 
-  const removeCoupon = () => {
-    setAppliedCoupon(null);
-    setCouponError("");
+  const removeGiftCard = async () => {
+    if (!user) return;
+    try {
+      await api.post("/promotions/gift-cards/remove");
+      const cartRes = await api.get("/cart");
+      updateCartState(cartRes.data);
+    } catch (err) {
+      console.error("Failed to remove gift card", err);
+    }
   };
 
-  // Computations
-  const subtotal = cartItems.reduce((sum, item) => sum + item.price * item.quantity, 0);
-
-  const discount = appliedCoupon
-    ? appliedCoupon.type === "percentage"
-      ? parseFloat(((subtotal * appliedCoupon.value) / 100).toFixed(2))
-      : appliedCoupon.value
-    : 0;
-
+  // Guest-only calculations fallback
+  const guestSubtotal = cartItems.reduce((sum, item) => sum + item.price * item.quantity, 0);
   const freeShippingThreshold = 499;
-  const shipping = subtotal === 0
-    ? 0
-    : subtotal - discount >= freeShippingThreshold ? 0 : 99;
+  const guestShipping = guestSubtotal === 0 ? 0 : guestSubtotal >= freeShippingThreshold ? 0 : 99;
+  const guestTax = parseFloat(((guestSubtotal * 18) / 100).toFixed(2));
+  const guestTotal = parseFloat((guestSubtotal + guestShipping + guestTax).toFixed(2));
 
-  const tax = parseFloat(((Math.max(0, subtotal - discount) * 18) / 100).toFixed(2));
-  const total = parseFloat((Math.max(0, subtotal - discount) + shipping + tax).toFixed(2));
+  // Determine final values based on user authentication
+  const subtotal = user ? totals.subtotal : guestSubtotal;
+  const discount = user ? totals.discount : 0;
+  const shipping = user ? totals.shipping : guestShipping;
+  const tax = user ? totals.tax : guestTax;
+  const giftCardDiscount = user ? totals.giftCardDiscount : 0;
+  const total = user ? totals.total : guestTotal;
   const cartCount = cartItems.reduce((sum, item) => sum + item.quantity, 0);
 
   return (
@@ -253,9 +405,12 @@ export const CartProvider = ({ children }) => {
         discount,
         shipping,
         tax,
+        giftCardDiscount,
         total,
         appliedCoupon,
         couponError,
+        appliedGiftCard,
+        giftCardError,
         freeShippingThreshold,
         addToCart,
         removeFromCart,
@@ -263,6 +418,8 @@ export const CartProvider = ({ children }) => {
         clearCart,
         applyCoupon,
         removeCoupon,
+        applyGiftCard,
+        removeGiftCard,
       }}
     >
       {children}
