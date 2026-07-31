@@ -19,12 +19,30 @@ const imageSchema = z.object({
   position: z.number().int().default(0),
 });
 
-const variantSchema = z.object({
-  sku: z.string().trim().min(1, 'SKU is required'),
-  name: z.string().trim().min(1, 'Variant name is required'),
-  price: z.number().min(0, 'Variant price must be non-negative'),
-  stock_quantity: z.number().int().min(0, 'Stock quantity must be non-negative'),
+const optionSchema = z.object({
+  option_name: z.string(),
+  option_value: z.string(),
 });
+
+const variantImageSchema = z.object({
+  image_url: z.string(),
+  position: z.number().default(0),
+});
+
+const variantSchema = z.object({
+  sku: z.string().trim().optional().nullable(),
+  name: z.string().trim().optional(),
+  variant_name: z.string().trim().optional(),
+  price: z.number().min(0, 'Variant price must be non-negative'),
+  sale_price: z.number().min(0).optional().nullable(),
+  stock: z.number().int().min(0).optional(),
+  stock_quantity: z.number().int().min(0).optional(),
+  weight: z.number().min(0).optional().nullable(),
+  is_default: z.boolean().optional(),
+  status: z.string().optional(),
+  options: z.array(optionSchema).optional(),
+  images: z.array(variantImageSchema).optional(),
+}).passthrough();
 
 export const createProductSchema = z.object({
   body: z.object({

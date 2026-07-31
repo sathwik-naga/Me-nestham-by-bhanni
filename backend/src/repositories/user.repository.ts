@@ -1,4 +1,4 @@
-import { supabase } from '../lib/supabase';
+import { supabase, supabaseAdmin } from '../lib/supabase';
 import { AppError } from '../middleware/error';
 import logger from '../utils/logger';
 
@@ -88,6 +88,24 @@ export class UserRepository {
     } catch (err) {
       logger.error(`Unexpected error during getUserByToken: ${err}`);
       return null;
+    }
+  }
+
+  /**
+   * Retrieve list of all users from Supabase Auth (Admin only)
+   */
+  async listAllUsers() {
+    try {
+      const { data: { users }, error } = await supabaseAdmin.auth.admin.listUsers();
+      if (error) {
+        logger.error(`Supabase Auth listUsers failed: ${error.message}`);
+        throw new AppError(error.message, 500);
+      }
+      return users;
+    } catch (err) {
+      if (err instanceof AppError) throw err;
+      logger.error(`Unexpected error listing users: ${err}`);
+      throw new AppError('Internal authentication error during listing users', 500);
     }
   }
 }

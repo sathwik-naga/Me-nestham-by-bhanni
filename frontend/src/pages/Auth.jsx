@@ -1,23 +1,33 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import { Link } from "react-router-dom";
 import { useNavigate, useSearchParams } from "react-router-dom";
+import logo from "../assets/logo.jpeg";
 import { useAuth } from "../context/AuthContext";
-import { Mail, Lock, User, Phone, CheckCircle, AlertTriangle, ArrowRight } from "lucide-react";
-import { motion, AnimatePresence } from "framer-motion";
+import { Mail, Lock, User, Phone, CheckCircle, AlertTriangle } from "lucide-react";
+import SEO from "../components/SEO/SEO";
 
 export default function Auth() {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
-  const redirect = searchParams.get("redirect") || "/profile";
 
   const { login, signup, loginWithGoogle, user } = useAuth();
+
+  const handleRedirect = useCallback(() => {
+    const savedRedirect = sessionStorage.getItem("redirectAfterLogin");
+    if (savedRedirect) {
+      sessionStorage.removeItem("redirectAfterLogin");
+      navigate(savedRedirect);
+    } else {
+      navigate(searchParams.get("redirect") || "/profile");
+    }
+  }, [navigate, searchParams]);
 
   // If already logged in, redirect
   useEffect(() => {
     if (user) {
-      navigate(redirect);
+      handleRedirect();
     }
-  }, [user, navigate, redirect]);
+  }, [user, navigate, handleRedirect]);
 
   const [activeTab, setActiveTab] = useState("login"); // login, signup, forgot
   const [showPassword, setShowPassword] = useState(false);
@@ -41,7 +51,7 @@ export default function Auth() {
     try {
       await login(loginForm.email, loginForm.password);
       setSuccessMsg("Login successful! Redirecting...");
-      setTimeout(() => navigate(redirect), 800);
+      setTimeout(() => handleRedirect(), 800);
     } catch (err) {
       setErrorMsg(err.message || "Login failed.");
     } finally {
@@ -68,7 +78,7 @@ export default function Auth() {
     try {
       await signup(signupForm.name, signupForm.email, signupForm.password, signupForm.phone);
       setSuccessMsg("Registration successful! Welcome to Bhanni.");
-      setTimeout(() => navigate(redirect), 1000);
+      setTimeout(() => handleRedirect(), 1000);
     } catch (err) {
       setErrorMsg(err.message || "Registration failed.");
     } finally {
@@ -109,20 +119,21 @@ export default function Auth() {
   };
 
   return (
-    <div className="max-w-md mx-auto px-6 py-16 font-accent text-left">
-      <div className="bg-brand-card border border-brand-border rounded-3xl p-8 shadow-xl flex flex-col items-center">
+    <div className="min-h-screen flex items-center justify-center bg-brand-secondary py-12 px-6 font-accent">
+      <SEO title="Account Access" noindex={true} />
+      <div className="max-w-md w-full bg-brand-card border border-brand-border rounded-3xl p-8 shadow-xl flex flex-col items-center">
         {/* Brand logo */}
-        <div className="flex items-center gap-2 mb-6">
-          <img src="/src/assets/logo.svg" alt="Me Nestham Logo" className="w-10 h-10" />
+        <div className="flex items-center gap-3 mb-6">
+          <img src={logo} alt="Me Nestham by Bhanni Logo" className="w-12 h-12 rounded-full object-cover shadow-md" />
           <div className="flex flex-col text-left">
-            <span className="font-serif text-lg font-bold text-brand-primary">Me Nestham</span>
-            <span className="text-[9px] uppercase tracking-widest text-brand-text-muted font-bold">By Bhanni</span>
+            <span className="font-serif text-xl font-bold text-brand-primary">Me Nestham</span>
+            <span className="text-[10px] uppercase tracking-widest text-brand-text-muted font-bold">By Bhanni</span>
           </div>
         </div>
 
         {/* Tab switcher */}
         {activeTab !== "forgot" && (
-          <div className="grid grid-cols-2 bg-brand-secondary dark:bg-[#201D1B] border border-brand-border rounded-xl p-1.5 w-full mb-6 text-xs font-semibold">
+          <div className="grid grid-cols-2 bg-brand-secondary border border-brand-border rounded-xl p-1.5 w-full mb-6 text-xs font-semibold">
             <button
               onClick={() => { setActiveTab("login"); setErrorMsg(""); }}
               className={`py-2.5 rounded-lg transition-all ${
@@ -359,7 +370,7 @@ export default function Auth() {
               type="button"
               onClick={handleGoogleAuth}
               disabled={loading}
-              className="w-full flex items-center justify-center gap-2 border border-brand-border hover:bg-brand-secondary dark:hover:bg-[#201D1B] rounded-xl py-3 text-xs font-semibold text-brand-text transition-colors cursor-pointer"
+              className="w-full flex items-center justify-center gap-2 border border-brand-border hover:bg-brand-secondary rounded-xl py-3 text-xs font-semibold text-brand-text transition-colors cursor-pointer"
             >
               <svg className="w-4 h-4 shrink-0" viewBox="0 0 24 24">
                 <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" />

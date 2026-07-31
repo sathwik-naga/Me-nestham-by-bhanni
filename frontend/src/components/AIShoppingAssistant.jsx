@@ -108,9 +108,9 @@ export default function AIShoppingAssistant() {
   };
 
   const quickReplies = [
-    "🎁 Find me a gift under ₹2000",
+    "🎁 Find me items under ₹500",
     "📦 How do I track my order?",
-    "🌟 Show me handcrafted jewelry",
+    "🌸 Show me foam flowers & beads",
     "🔥 What are the active coupons?"
   ];
 
@@ -146,7 +146,7 @@ export default function AIShoppingAssistant() {
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, y: 30, scale: 0.95 }}
             transition={{ duration: 0.2 }}
-            className="absolute bottom-20 right-0 w-[380px] h-[550px] bg-brand-card border border-brand-border rounded-3xl shadow-2xl flex flex-col overflow-hidden"
+            className="absolute bottom-20 right-0 w-[380px] h-[550px] bg-brand-modal border border-brand-border rounded-3xl shadow-2xl flex flex-col overflow-hidden"
           >
             {/* Header */}
             <div className="bg-brand-primary p-4 text-white flex items-center justify-between">
@@ -224,7 +224,7 @@ export default function AIShoppingAssistant() {
                   <button
                     key={i}
                     onClick={() => handleSend(reply.substring(2))} // strip emojis
-                    className="text-[10px] font-semibold bg-brand-secondary dark:bg-[#25211E] text-brand-text hover:text-white hover:bg-brand-primary border border-brand-border rounded-full px-3 py-1.5 transition-colors"
+                    className="text-[10px] font-semibold bg-brand-secondary text-brand-text hover:text-white hover:bg-brand-primary border border-brand-border rounded-full px-3 py-1.5 transition-colors"
                   >
                     {reply}
                   </button>
@@ -243,7 +243,7 @@ export default function AIShoppingAssistant() {
                   placeholder="Ask about materials, orders, coupons..."
                   value={input}
                   onChange={(e) => setInput(e.target.value)}
-                  className="flex-1 bg-brand-secondary dark:bg-[#25211E] text-brand-text px-4 py-2.5 rounded-xl border border-brand-border focus:border-brand-primary outline-none text-xs"
+                  className="flex-1 bg-brand-secondary text-brand-text px-4 py-2.5 rounded-xl border border-brand-border focus:border-brand-primary outline-none text-xs"
                 />
                 <button
                   type="submit"

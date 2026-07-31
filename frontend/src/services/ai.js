@@ -98,8 +98,8 @@ export const aiService = {
       text = "You can easily track your order! Go to [My Orders](/profile) tab in your profile, click on your order, and hit 'Track Order' to see its live shipping status. If you know your order ID, you can also view it directly.";
     } else if (lastUserMessage.includes("discount") || lastUserMessage.includes("coupon") || lastUserMessage.includes("code") || lastUserMessage.includes("offer")) {
       text = "We have three exclusive coupons running: Use **WELCOME10** for 10% off your first order, **FESTIVE25** for 25% off on orders above ₹2000, or **FREE500** for flat ₹500 off on purchases above ₹3000!";
-    } else if (lastUserMessage.includes("return") || lastUserMessage.includes("refund") || lastUserMessage.includes("policy")) {
-      text = "We offer a hassle-free 7-day return policy for all unused products in their original packaging. You can initiate a return directly from your profile's [My Orders](/profile) tab.";
+    } else if (lastUserMessage.includes("return") || lastUserMessage.includes("refund") || lastUserMessage.includes("exchange")) {
+      text = "All sales are final. We do not accept returns or exchanges once orders are dispatched. If you received a damaged or wrong item, please connect directly with our team on WhatsApp.";
     } else {
       // Default semantic search on all products
       const searchWords = lastUserMessage.split(/\s+/);

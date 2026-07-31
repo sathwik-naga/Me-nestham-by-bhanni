@@ -1,8 +1,15 @@
 import React from "react";
 import { Link } from "react-router-dom";
 import { Heart, Compass, ShieldAlert, Award, Star } from "lucide-react";
+import SEO from "../components/SEO/SEO";
+import { generateBreadcrumbSchema } from "../utils/seo";
 
 export default function About() {
+  const breadcrumbsSchema = generateBreadcrumbSchema([
+    { name: "Home", url: "/" },
+    { name: "About Us", url: "/about" }
+  ]);
+
   const values = [
     {
       icon: <Heart className="text-brand-primary" size={24} />,
@@ -23,6 +30,12 @@ export default function About() {
 
   return (
     <div className="max-w-7xl mx-auto px-6 md:px-12 py-10 font-accent flex flex-col text-left">
+      <SEO
+        title="About Us &amp; Our Story"
+        description="Learn about Me Nestham by Bhanni, our mission to preserve authentic Indian handcrafted traditions, and direct artisan support."
+        keywords="About Me Nestham, Indian Craftsmanship, Artisan Heritage, Bhanni Handcrafted"
+        jsonLd={breadcrumbsSchema}
+      />
       {/* Breadcrumbs */}
       <div className="text-xs text-brand-text-muted mb-8">
         <Link to="/" className="hover:text-brand-primary">Home</Link>
@@ -62,12 +75,12 @@ export default function About() {
       </section>
 
       {/* Values grid */}
-      <section className="bg-brand-secondary dark:bg-[#1E1A17] border border-brand-border rounded-3xl p-8 md:p-12 mb-20">
+      <section className="bg-brand-secondary border border-brand-border rounded-3xl p-8 md:p-12 mb-20">
         <h2 className="font-serif text-2xl md:text-3xl font-bold text-brand-text text-center mb-10">Our Core Principles</h2>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
           {values.map((v, i) => (
             <div key={i} className="flex flex-col items-start bg-brand-card border border-brand-card-border p-6 rounded-2xl shadow-sm text-left">
-              <div className="p-3 bg-brand-secondary dark:bg-[#201D1B] rounded-xl mb-4 border border-brand-border/60">
+              <div className="p-3 bg-brand-secondary rounded-xl mb-4 border border-brand-border/60">
                 {v.icon}
               </div>
               <h3 className="font-serif font-bold text-base text-brand-text mb-2">{v.title}</h3>
@@ -105,7 +118,7 @@ export default function About() {
         </p>
         <Link
           to="/shop"
-          className="bg-brand-secondary dark:bg-[#1A1714] text-brand-text font-semibold px-8 py-4 rounded-xl shadow-md hover:scale-105 transition-all text-xs inline-block mt-2 active:scale-95"
+          className="bg-brand-secondary text-brand-text font-semibold px-8 py-4 rounded-xl shadow-md hover:scale-105 transition-all text-xs inline-block mt-2 active:scale-95"
         >
           Browse All Products
         </Link>

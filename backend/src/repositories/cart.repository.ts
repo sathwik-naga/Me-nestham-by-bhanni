@@ -75,7 +75,8 @@ export class CartRepository {
           *,
           product:products(
             *,
-            images:product_images(*)
+            images:product_images(*),
+            variants:product_variants(*)
           )
           `
         )
@@ -88,10 +89,103 @@ export class CartRepository {
       }
 
       const rawItems = (data || []) as Array<Record<string, unknown>>;
-      const formattedItems = rawItems.map((item) => ({
-        ...item,
-        product: this.formatJoinedProduct(item.product as Record<string, unknown> | null),
-      })) as unknown as CartItem[];
+      
+      // Fetch options and images for the variants in bulk
+      const variantIds = rawItems.map((item) => item.variant_id).filter(Boolean) as string[];
+      let optionsMap: Record<string, any[]> = {};
+      let imagesMap: Record<string, any[]> = {};
+
+      if (variantIds.length > 0) {
+        try {
+          const { data: optionsData } = await supabaseAdmin
+            .from('variant_options')
+            .select('*')
+            .in('variant_id', variantIds);
+          if (optionsData) {
+            optionsData.forEach((opt: any) => {
+              if (!optionsMap[opt.variant_id]) optionsMap[opt.variant_id] = [];
+              optionsMap[opt.variant_id].push({
+                option_name: opt.option_name,
+                option_value: opt.option_value,
+              });
+            });
+          }
+        } catch (e) {
+          logger.warn(`Failed to fetch variant_options for cart items: ${e}`);
+        }
+
+        try {
+          const { data: imagesData } = await supabaseAdmin
+            .from('variant_images')
+            .select('*')
+            .in('variant_id', variantIds)
+            .order('is_primary', { ascending: false })
+            .order('sort_order', { ascending: true });
+
+          if (imagesData) {
+            imagesData.forEach((img: any) => {
+              if (!imagesMap[img.variant_id]) imagesMap[img.variant_id] = [];
+
+              let publicUrl = img.image_url;
+              if (img.storage_path) {
+                const { data } = supabaseAdmin.storage
+                  .from('product-images')
+                  .getPublicUrl(img.storage_path);
+                if (data?.publicUrl) publicUrl = data.publicUrl;
+              }
+
+              imagesMap[img.variant_id].push({
+                id: img.id,
+                variant_id: img.variant_id,
+                storage_path: img.storage_path || null,
+                image_url: publicUrl || '',
+                media_type: img.media_type || 'image',
+                alt_text: img.alt_text || null,
+                sort_order: img.sort_order !== undefined && img.sort_order !== null ? img.sort_order : (img.position || 0),
+                is_primary: !!img.is_primary,
+                position: img.sort_order !== undefined && img.sort_order !== null ? img.sort_order : (img.position || 0),
+              });
+            });
+          }
+        } catch (e) {
+          logger.warn(`Failed to fetch variant_images for cart items: ${e}`);
+        }
+      }
+
+      const formattedItems = rawItems.map((item) => {
+        const product = this.formatJoinedProduct(item.product as Record<string, unknown> | null);
+        let variant = null;
+        if (product && Array.isArray(product.variants) && item.variant_id) {
+          variant = product.variants.find((v: any) => v.id === item.variant_id) || null;
+          if (variant) {
+            variant.stock = variant.stock !== undefined ? variant.stock : (variant.stock_quantity || 0);
+            variant.stock_quantity = variant.stock_quantity !== undefined ? variant.stock_quantity : variant.stock;
+            
+            // Set options
+            if (optionsMap[variant.id]) {
+              variant.options = optionsMap[variant.id];
+            } else if (!variant.options) {
+              const fallbackOptions = [];
+              if (variant.size) fallbackOptions.push({ option_name: 'Size', option_value: variant.size });
+              if (variant.color) fallbackOptions.push({ option_name: 'Color', option_value: variant.color });
+              if (variant.material) fallbackOptions.push({ option_name: 'Material', option_value: variant.material });
+              variant.options = fallbackOptions;
+            }
+
+            // Set images
+            if (imagesMap[variant.id]) {
+              variant.images = imagesMap[variant.id];
+            } else if (!variant.images) {
+              variant.images = [];
+            }
+          }
+        }
+        return {
+          ...item,
+          product,
+          variant,
+        };
+      }) as unknown as CartItem[];
 
       return formattedItems;
     } catch (err) {
@@ -102,16 +196,23 @@ export class CartRepository {
   }
 
   /**
-   * Find single cart item by cart ID and product ID
+   * Find single cart item by cart ID, product ID and optional variant ID
    */
-  async getCartItemByProduct(cartId: string, productId: string): Promise<CartItem | null> {
+  async getCartItemByProduct(cartId: string, productId: string, variantId?: string | null): Promise<CartItem | null> {
     try {
-      const { data, error } = await supabaseAdmin
+      let query = supabaseAdmin
         .from('cart_items')
         .select('*')
         .eq('cart_id', cartId)
-        .eq('product_id', productId)
-        .single();
+        .eq('product_id', productId);
+
+      if (variantId) {
+        query = query.eq('variant_id', variantId);
+      } else {
+        query = query.is('variant_id', null);
+      }
+
+      const { data, error } = await query.single();
 
       if (error) {
         if (error.code === 'PGRST116') return null;
@@ -155,11 +256,11 @@ export class CartRepository {
   /**
    * Add new item to cart
    */
-  async createCartItem(cartId: string, productId: string, quantity: number): Promise<CartItem> {
+  async createCartItem(cartId: string, productId: string, quantity: number, variantId?: string | null): Promise<CartItem> {
     try {
       const { data, error } = await supabaseAdmin
         .from('cart_items')
-        .insert([{ cart_id: cartId, product_id: productId, quantity }])
+        .insert([{ cart_id: cartId, product_id: productId, quantity, variant_id: variantId || null }])
         .select()
         .single();
 
@@ -240,6 +341,90 @@ export class CartRepository {
       if (err instanceof AppError) throw err;
       logger.error(`Unexpected error clearCart: ${err}`);
       throw new AppError('Internal server error during cart clearing', 500);
+    }
+  }
+
+  /**
+   * Apply coupon code to cart
+   */
+  async applyCouponCode(cartId: string, code: string): Promise<void> {
+    try {
+      const { error } = await supabaseAdmin
+        .from('cart')
+        .update({ coupon_code: code })
+        .eq('id', cartId);
+
+      if (error) {
+        logger.error(`Database error applying coupon to cart ${cartId}: ${error.message}`);
+        throw new AppError('Failed to apply coupon', 500);
+      }
+    } catch (err) {
+      if (err instanceof AppError) throw err;
+      logger.error(`Unexpected error applyCouponCode: ${err}`);
+      throw new AppError('Internal server error', 500);
+    }
+  }
+
+  /**
+   * Remove coupon code from cart
+   */
+  async removeCouponCode(cartId: string): Promise<void> {
+    try {
+      const { error } = await supabaseAdmin
+        .from('cart')
+        .update({ coupon_code: null })
+        .eq('id', cartId);
+
+      if (error) {
+        logger.error(`Database error removing coupon from cart ${cartId}: ${error.message}`);
+        throw new AppError('Failed to remove coupon', 500);
+      }
+    } catch (err) {
+      if (err instanceof AppError) throw err;
+      logger.error(`Unexpected error removeCouponCode: ${err}`);
+      throw new AppError('Internal server error', 500);
+    }
+  }
+
+  /**
+   * Apply gift card code to cart
+   */
+  async applyGiftCardCode(cartId: string, code: string): Promise<void> {
+    try {
+      const { error } = await supabaseAdmin
+        .from('cart')
+        .update({ gift_card_code: code })
+        .eq('id', cartId);
+
+      if (error) {
+        logger.error(`Database error applying gift card to cart ${cartId}: ${error.message}`);
+        throw new AppError('Failed to apply gift card', 500);
+      }
+    } catch (err) {
+      if (err instanceof AppError) throw err;
+      logger.error(`Unexpected error applyGiftCardCode: ${err}`);
+      throw new AppError('Internal server error', 500);
+    }
+  }
+
+  /**
+   * Remove gift card code from cart
+   */
+  async removeGiftCardCode(cartId: string): Promise<void> {
+    try {
+      const { error } = await supabaseAdmin
+        .from('cart')
+        .update({ gift_card_code: null })
+        .eq('id', cartId);
+
+      if (error) {
+        logger.error(`Database error removing gift card from cart ${cartId}: ${error.message}`);
+        throw new AppError('Failed to remove gift card', 500);
+      }
+    } catch (err) {
+      if (err instanceof AppError) throw err;
+      logger.error(`Unexpected error removeGiftCardCode: ${err}`);
+      throw new AppError('Internal server error', 500);
     }
   }
 }

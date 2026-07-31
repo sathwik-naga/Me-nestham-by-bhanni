@@ -116,7 +116,7 @@ export default function OrderConfirmation() {
           transition={{ type: "spring", stiffness: 260, damping: 20 }}
           className="text-brand-success"
         >
-          <CheckCircle2 size={64} fill="currentColor" className="text-white dark:text-[#1A1714]" />
+          <CheckCircle2 size={64} fill="currentColor" className="text-brand-bg" />
         </motion.div>
         
         <h1 className="font-serif text-3xl font-extrabold text-brand-text">Thank You for Your Order!</h1>

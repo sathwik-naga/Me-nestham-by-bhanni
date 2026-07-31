@@ -21,21 +21,7 @@ export default function Policies() {
             </>
           )
         };
-      case "returns":
-        return {
-          title: "Return &amp; Exchange Policy",
-          lastUpdated: "July 12, 2026",
-          content: (
-            <>
-              <h3>1. Return Window</h3>
-              <p>We support a 7-day hassle-free return window for all unused items. Products must be returned in their original packaging with invoice tags intact.</p>
-              <h3>2. Exclusions</h3>
-              <p>Certain product categories such as customized paintings, custom sized apparel, and personal earrings/ornaments cannot be returned due to hygiene and custom craftsmanship rules.</p>
-              <h3>3. Refund Schedule</h3>
-              <p>Once reverse pickup is completed and quality checks pass at our center, refunds are processed back to your original source channel (UPI, Card, Wallet) within 5-7 working days.</p>
-            </>
-          )
-        };
+
       case "privacy":
         return {
           title: "Privacy Policy",
@@ -92,7 +78,6 @@ export default function Policies() {
           <span className="text-[10px] font-bold text-brand-primary uppercase tracking-wider block mb-3 pl-4">Policy Hub</span>
           {[
             { slug: "shipping", label: "Shipping Policy" },
-            { slug: "returns", label: "Returns & Exchanges" },
             { slug: "privacy", label: "Privacy Policy" },
             { slug: "terms", label: "Terms & Conditions" }
           ].map((doc) => (
@@ -102,7 +87,7 @@ export default function Policies() {
               className={`px-4 py-3.5 rounded-xl text-xs font-semibold transition-all ${
                 policyType === doc.slug 
                   ? "bg-brand-primary text-white shadow-sm font-bold" 
-                  : "text-brand-text hover:bg-brand-secondary hover:dark:bg-[#25211E]"
+                  : "text-brand-text hover:bg-brand-secondary"
               }`}
             >
               {doc.label}

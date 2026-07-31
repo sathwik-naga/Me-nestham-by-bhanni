@@ -2,8 +2,10 @@ import React, { useState, useEffect } from "react";
 import { useParams, Link, useSearchParams } from "react-router-dom";
 import { db } from "../services/db";
 import ProductCard from "../components/ProductCard";
-import { SlidersHorizontal, RefreshCcw, Filter, Star, Eye } from "lucide-react";
+import { SlidersHorizontal, RefreshCcw, Filter, Star } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
+import SEO from "../components/SEO/SEO";
+import { generateCollectionPageSchema, generateBreadcrumbSchema } from "../utils/seo";
 
 export default function CategoryDetail() {
   const { slug } = useParams();
@@ -85,8 +87,24 @@ export default function CategoryDetail() {
   if (minRating > 0) activeChips.push({ label: `Rating: ${minRating}★ +`, remove: () => setMinRating(0) });
   if (inStockOnly) activeChips.push({ label: "In Stock Only", remove: () => setInStockOnly(false) });
 
+  const collectionSchema = generateCollectionPageSchema(currentCategory, filteredProducts.length);
+  const breadcrumbsSchema = generateBreadcrumbSchema([
+    { name: "Home", url: "/" },
+    { name: "Categories", url: "/categories" },
+    { name: currentCategory.name, url: `/categories/${currentCategory.slug}` }
+  ]);
+  const jsonLd = [collectionSchema, breadcrumbsSchema].filter(Boolean);
+
   return (
     <div className="max-w-7xl mx-auto px-6 md:px-12 py-10 font-accent flex flex-col text-left">
+      <SEO
+        title={`${currentCategory.name} Collection`}
+        description={currentCategory.description || `Explore ${currentCategory.name} at Me Nestham by Bhanni.`}
+        keywords={`${currentCategory.name}, Garland Materials, Artificial Flower Petals, Craft Supplies`}
+        canonicalUrl={`https://www.menesthambybhanni.com/categories/${currentCategory.slug}`}
+        ogImage={currentCategory.image}
+        jsonLd={jsonLd}
+      />
       {/* Breadcrumb */}
       <div className="text-xs text-brand-text-muted mb-6">
         <Link to="/" className="hover:text-brand-primary">Home</Link>
@@ -152,7 +170,7 @@ export default function CategoryDetail() {
                   key={rating}
                   onClick={() => setMinRating(rating)}
                   className={`flex items-center gap-2 text-left text-xs font-semibold px-3 py-2 rounded-lg transition-colors ${
-                    minRating === rating ? "bg-brand-primary text-white" : "hover:bg-brand-secondary hover:dark:bg-[#25211E] text-brand-text"
+                    minRating === rating ? "bg-brand-primary text-white" : "hover:bg-brand-secondary text-brand-text"
                   }`}
                 >
                   <Star size={12} fill={rating > 0 ? "currentColor" : "none"} className={minRating === rating ? "text-white" : "text-amber-500"} />
@@ -181,7 +199,7 @@ export default function CategoryDetail() {
                 <Link
                   key={cat.id}
                   to={`/categories/${cat.slug}`}
-                  className="text-xs font-semibold text-brand-text hover:text-brand-primary p-2 hover:bg-brand-secondary hover:dark:bg-[#25211E] rounded-lg transition-colors"
+                  className="text-xs font-semibold text-brand-text hover:text-brand-primary p-2 hover:bg-brand-secondary rounded-lg transition-colors"
                 >
                   {cat.name}
                 </Link>
@@ -193,7 +211,7 @@ export default function CategoryDetail() {
         {/* Products Panel */}
         <div className="lg:col-span-3 flex flex-col gap-6">
           {/* Top Sort & Filter Trigger for Mobile */}
-          <div className="flex items-center justify-between bg-brand-secondary dark:bg-[#221E1C] border border-brand-border p-4 rounded-2xl">
+          <div className="flex items-center justify-between bg-brand-secondary border border-brand-border p-4 rounded-2xl">
             <button
               onClick={() => setShowMobileFilters(true)}
               className="lg:hidden flex items-center gap-1.5 text-xs font-semibold border border-brand-border bg-brand-card rounded-xl px-4 py-2 hover:bg-brand-secondary text-brand-text shadow-sm"
@@ -273,7 +291,7 @@ export default function CategoryDetail() {
                     setIsLoading(false);
                   }, 400);
                 }}
-                className="bg-brand-secondary dark:bg-[#221E1C] hover:bg-brand-border dark:hover:bg-[#2D2723] text-brand-text border border-brand-border font-semibold text-xs px-8 py-3.5 rounded-xl transition-all shadow-sm disabled:opacity-50"
+                className="bg-brand-secondary hover:bg-brand-border text-brand-text border border-brand-border font-semibold text-xs px-8 py-3.5 rounded-xl transition-all shadow-sm disabled:opacity-50"
               >
                 {isLoading ? "Loading..." : "Load More Items"}
               </button>
@@ -298,7 +316,7 @@ export default function CategoryDetail() {
               animate={{ y: 0 }}
               exit={{ y: "100%" }}
               transition={{ type: "spring", damping: 25, stiffness: 220 }}
-              className="fixed bottom-0 left-0 right-0 max-h-[80vh] bg-brand-bg rounded-t-3xl border-t border-brand-border z-50 shadow-2xl overflow-y-auto p-6 font-accent flex flex-col gap-6"
+              className="fixed bottom-0 left-0 right-0 max-h-[80vh] bg-brand-modal rounded-t-3xl border-t border-brand-border z-50 shadow-2xl overflow-y-auto p-6 font-accent flex flex-col gap-6"
             >
               <div className="flex items-center justify-between border-b border-brand-border pb-3">
                 <h3 className="font-serif font-bold text-base text-brand-text flex items-center gap-1.5">

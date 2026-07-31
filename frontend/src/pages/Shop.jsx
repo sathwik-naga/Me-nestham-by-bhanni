@@ -2,10 +2,12 @@ import React, { useState, useEffect } from "react";
 import { useSearchParams, Link } from "react-router-dom";
 import { getProducts } from "../services/supabase/products";
 import { getCategories } from "../services/supabase/categories";
-import { aiService } from "../services/ai";
 import ProductCard from "../components/ProductCard";
-import { Search, SlidersHorizontal, RefreshCcw, Filter, Star, Eye } from "lucide-react";
+import { Search, SlidersHorizontal, RefreshCcw, Filter, Star } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
+import SEO from "../components/SEO/SEO";
+import { generateBreadcrumbSchema } from "../utils/seo";
+import { trackSearch } from "../services/analytics/analytics";
 
 export default function Shop() {
   const [searchParams, setSearchParams] = useSearchParams();
@@ -29,6 +31,9 @@ export default function Shop() {
   // Reset page parameters when URL search query changes
   useEffect(() => {
     setSearchVal(queryParam);
+    if (queryParam.trim()) {
+      trackSearch(queryParam.trim(), displayProducts.length);
+    }
   }, [queryParam]);
 
   useEffect(() => {
@@ -139,8 +144,20 @@ useEffect(() => {
   if (minRating > 0) activeChips.push({ label: `Rating: ${minRating}★ +`, remove: () => setMinRating(0) });
   if (inStockOnly) activeChips.push({ label: "In Stock Only", remove: () => setInStockOnly(false) });
 
+  const breadcrumbsSchema = generateBreadcrumbSchema([
+    { name: "Home", url: "/" },
+    { name: "Shop", url: "/shop" }
+  ]);
+
   return (
     <div className="max-w-7xl mx-auto px-6 md:px-12 py-10 font-accent flex flex-col text-left">
+      <SEO
+        title={queryParam ? `Search Results for "${queryParam}"` : "Shop All Garland Materials & Craft Supplies"}
+        description="Browse our complete catalog of garland making raw materials, artificial flower petals, and craft decoration supplies at Me Nestham by Bhanni."
+        keywords="Garland Materials Shop, Artificial Flower Petals, Craft Decoration, Flower Supplies Online"
+        noindex={Boolean(queryParam)}
+        jsonLd={breadcrumbsSchema}
+      />
       {/* Breadcrumb */}
       <div className="text-xs text-brand-text-muted mb-6">
         <Link to="/" className="hover:text-brand-primary">Home</Link>
@@ -207,7 +224,7 @@ useEffect(() => {
               <button
                 onClick={() => { setSelectedCategory(""); setSearchParams(queryParam ? { q: queryParam } : {}); }}
                 className={`text-left text-xs font-semibold px-3 py-2 rounded-lg transition-colors ${
-                  !selectedCategory ? "bg-brand-primary text-white" : "hover:bg-brand-secondary hover:dark:bg-[#25211E] text-brand-text"
+                  !selectedCategory ? "bg-brand-primary text-white" : "hover:bg-brand-secondary text-brand-text"
                 }`}
               >
                 All categories
@@ -217,7 +234,7 @@ useEffect(() => {
                   key={cat.id}
                   onClick={() => { setSelectedCategory(cat.slug); setSearchParams({ category: cat.slug, ...(queryParam ? { q: queryParam } : {}) }); }}
                   className={`text-left text-xs font-semibold px-3 py-2 rounded-lg transition-colors ${
-                    selectedCategory === cat.slug ? "bg-brand-primary text-white" : "hover:bg-brand-secondary hover:dark:bg-[#25211E] text-brand-text"
+                    selectedCategory === cat.slug ? "bg-brand-primary text-white" : "hover:bg-brand-secondary text-brand-text"
                   }`}
                 >
                   {cat.name}
@@ -257,7 +274,7 @@ useEffect(() => {
                   key={rating}
                   onClick={() => setMinRating(rating)}
                   className={`flex items-center gap-2 text-left text-xs font-semibold px-3 py-2 rounded-lg transition-colors ${
-                    minRating === rating ? "bg-brand-primary text-white" : "hover:bg-brand-secondary hover:dark:bg-[#25211E] text-brand-text"
+                    minRating === rating ? "bg-brand-primary text-white" : "hover:bg-brand-secondary text-brand-text"
                   }`}
                 >
                   <Star size={12} fill={rating > 0 ? "currentColor" : "none"} className={minRating === rating ? "text-white" : "text-amber-500"} />
@@ -282,7 +299,7 @@ useEffect(() => {
         {/* Products Panel */}
         <div className="lg:col-span-3 flex flex-col gap-6">
           {/* Top Sort & Filter Trigger for Mobile */}
-          <div className="flex items-center justify-between bg-brand-secondary dark:bg-[#221E1C] border border-brand-border p-4 rounded-2xl">
+          <div className="flex items-center justify-between bg-brand-secondary border border-brand-border p-4 rounded-2xl">
             <button
               onClick={() => setShowMobileFilters(true)}
               className="lg:hidden flex items-center gap-1.5 text-xs font-semibold border border-brand-border bg-brand-card rounded-xl px-4 py-2 hover:bg-brand-secondary text-brand-text shadow-sm"
@@ -331,7 +348,7 @@ useEffect(() => {
           {/* Products Grid */}
           {displayProducts.length === 0 ? (
             <div className="flex flex-col items-center justify-center text-center py-20 bg-brand-card border border-brand-border rounded-3xl p-6">
-              <div className="w-16 h-16 rounded-full bg-brand-secondary dark:bg-[#25211E] border border-brand-border flex items-center justify-center text-brand-primary mb-4">
+              <div className="w-16 h-16 rounded-full bg-brand-secondary border border-brand-border flex items-center justify-center text-brand-primary mb-4">
                 <SlidersHorizontal size={24} />
               </div>
               <h3 className="font-serif font-bold text-lg text-brand-text mb-1">No products found</h3>
@@ -359,7 +376,7 @@ useEffect(() => {
               <button
                 disabled={isLoading}
                 onClick={loadMore}
-                className="bg-brand-secondary dark:bg-[#221E1C] hover:bg-brand-border dark:hover:bg-[#2D2723] text-brand-text border border-brand-border font-semibold text-xs px-8 py-3.5 rounded-xl transition-all shadow-sm active:scale-95 disabled:opacity-50"
+                className="bg-brand-secondary hover:bg-brand-border text-brand-text border border-brand-border font-semibold text-xs px-8 py-3.5 rounded-xl transition-all shadow-sm active:scale-95 disabled:opacity-50"
               >
                 {isLoading ? "Loading..." : "Load More Items"}
               </button>
@@ -384,7 +401,7 @@ useEffect(() => {
               animate={{ y: 0 }}
               exit={{ y: "100%" }}
               transition={{ type: "spring", damping: 25, stiffness: 220 }}
-              className="fixed bottom-0 left-0 right-0 max-h-[85vh] bg-brand-bg rounded-t-3xl border-t border-brand-border z-50 shadow-2xl overflow-y-auto p-6 font-accent flex flex-col gap-6"
+              className="fixed bottom-0 left-0 right-0 max-h-[85vh] bg-brand-modal rounded-t-3xl border-t border-brand-border z-50 shadow-2xl overflow-y-auto p-6 font-accent flex flex-col gap-6"
             >
               {/* Header */}
               <div className="flex items-center justify-between border-b border-brand-border pb-3">

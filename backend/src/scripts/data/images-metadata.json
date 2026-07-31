@@ -1,0 +1,552 @@
+{
+  "categoryImages": {
+    "foam-flowers": "categories/foam-flowers.png",
+    "artificial-flowers": "categories/artificial-flowers.png",
+    "decorative-balls": "categories/decorative-balls.png",
+    "bells": "categories/bells.png",
+    "beads": "categories/beads.png",
+    "decorative-items": "categories/decorative-items.png",
+    "plastic-flower-parts": "categories/plastic-flower-parts.png",
+    "threads": "categories/threads.png"
+  },
+  "productImagesMap": {
+    "premium-foam-flowers-pack": [
+      {
+        "relPath": "products/foam-flowers/premium-foam-flowers-pack-collage.png",
+        "absPath": "C:\\me nestham by bhanni\\backend\\src\\scripts\\data_images\\products\\foam-flowers\\premium-foam-flowers-pack-collage.png",
+        "width": 1150,
+        "height": 620,
+        "mimeType": "image/png",
+        "fileSize": 1144288,
+        "isFeatured": true,
+        "position": 0,
+        "altText": "Premium Foam Flowers Pack (100pcs)",
+        "label": "collage"
+      },
+      {
+        "relPath": "products/foam-flowers/premium-foam-flowers-pack-white.png",
+        "absPath": "C:\\me nestham by bhanni\\backend\\src\\scripts\\data_images\\products\\foam-flowers\\premium-foam-flowers-pack-white.png",
+        "width": 260,
+        "height": 300,
+        "mimeType": "image/png",
+        "fileSize": 114842,
+        "isFeatured": false,
+        "position": 1,
+        "altText": "Premium Foam Flowers Pack (100pcs) - White",
+        "label": "white"
+      },
+      {
+        "relPath": "products/foam-flowers/premium-foam-flowers-pack-red-orange.png",
+        "absPath": "C:\\me nestham by bhanni\\backend\\src\\scripts\\data_images\\products\\foam-flowers\\premium-foam-flowers-pack-red-orange.png",
+        "width": 260,
+        "height": 300,
+        "mimeType": "image/png",
+        "fileSize": 137639,
+        "isFeatured": false,
+        "position": 2,
+        "altText": "Premium Foam Flowers Pack (100pcs) - Red-orange",
+        "label": "red-orange"
+      },
+      {
+        "relPath": "products/foam-flowers/premium-foam-flowers-pack-dark-blue.png",
+        "absPath": "C:\\me nestham by bhanni\\backend\\src\\scripts\\data_images\\products\\foam-flowers\\premium-foam-flowers-pack-dark-blue.png",
+        "width": 260,
+        "height": 300,
+        "mimeType": "image/png",
+        "fileSize": 135603,
+        "isFeatured": false,
+        "position": 3,
+        "altText": "Premium Foam Flowers Pack (100pcs) - Dark-blue",
+        "label": "dark-blue"
+      },
+      {
+        "relPath": "products/foam-flowers/premium-foam-flowers-pack-aqua.png",
+        "absPath": "C:\\me nestham by bhanni\\backend\\src\\scripts\\data_images\\products\\foam-flowers\\premium-foam-flowers-pack-aqua.png",
+        "width": 260,
+        "height": 300,
+        "mimeType": "image/png",
+        "fileSize": 134505,
+        "isFeatured": false,
+        "position": 4,
+        "altText": "Premium Foam Flowers Pack (100pcs) - Aqua",
+        "label": "aqua"
+      },
+      {
+        "relPath": "products/foam-flowers/premium-foam-flowers-pack-magenta.png",
+        "absPath": "C:\\me nestham by bhanni\\backend\\src\\scripts\\data_images\\products\\foam-flowers\\premium-foam-flowers-pack-magenta.png",
+        "width": 260,
+        "height": 300,
+        "mimeType": "image/png",
+        "fileSize": 108886,
+        "isFeatured": false,
+        "position": 5,
+        "altText": "Premium Foam Flowers Pack (100pcs) - Magenta",
+        "label": "magenta"
+      },
+      {
+        "relPath": "products/foam-flowers/premium-foam-flowers-pack-teal.png",
+        "absPath": "C:\\me nestham by bhanni\\backend\\src\\scripts\\data_images\\products\\foam-flowers\\premium-foam-flowers-pack-teal.png",
+        "width": 260,
+        "height": 300,
+        "mimeType": "image/png",
+        "fileSize": 123954,
+        "isFeatured": false,
+        "position": 6,
+        "altText": "Premium Foam Flowers Pack (100pcs) - Teal",
+        "label": "teal"
+      },
+      {
+        "relPath": "products/foam-flowers/premium-foam-flowers-pack-lavender.png",
+        "absPath": "C:\\me nestham by bhanni\\backend\\src\\scripts\\data_images\\products\\foam-flowers\\premium-foam-flowers-pack-lavender.png",
+        "width": 260,
+        "height": 300,
+        "mimeType": "image/png",
+        "fileSize": 141564,
+        "isFeatured": false,
+        "position": 7,
+        "altText": "Premium Foam Flowers Pack (100pcs) - Lavender",
+        "label": "lavender"
+      },
+      {
+        "relPath": "products/foam-flowers/premium-foam-flowers-pack-dark-green.png",
+        "absPath": "C:\\me nestham by bhanni\\backend\\src\\scripts\\data_images\\products\\foam-flowers\\premium-foam-flowers-pack-dark-green.png",
+        "width": 260,
+        "height": 300,
+        "mimeType": "image/png",
+        "fileSize": 115464,
+        "isFeatured": false,
+        "position": 8,
+        "altText": "Premium Foam Flowers Pack (100pcs) - Dark-green",
+        "label": "dark-green"
+      },
+      {
+        "relPath": "products/foam-flowers/premium-foam-flowers-pack-silver.png",
+        "absPath": "C:\\me nestham by bhanni\\backend\\src\\scripts\\data_images\\products\\foam-flowers\\premium-foam-flowers-pack-silver.png",
+        "width": 260,
+        "height": 300,
+        "mimeType": "image/png",
+        "fileSize": 138489,
+        "isFeatured": false,
+        "position": 9,
+        "altText": "Premium Foam Flowers Pack (100pcs) - Silver",
+        "label": "silver"
+      },
+      {
+        "relPath": "products/foam-flowers/premium-foam-flowers-pack-yellow.png",
+        "absPath": "C:\\me nestham by bhanni\\backend\\src\\scripts\\data_images\\products\\foam-flowers\\premium-foam-flowers-pack-yellow.png",
+        "width": 260,
+        "height": 300,
+        "mimeType": "image/png",
+        "fileSize": 121672,
+        "isFeatured": false,
+        "position": 10,
+        "altText": "Premium Foam Flowers Pack (100pcs) - Yellow",
+        "label": "yellow"
+      },
+      {
+        "relPath": "products/foam-flowers/premium-foam-flowers-pack-maroon.png",
+        "absPath": "C:\\me nestham by bhanni\\backend\\src\\scripts\\data_images\\products\\foam-flowers\\premium-foam-flowers-pack-maroon.png",
+        "width": 260,
+        "height": 300,
+        "mimeType": "image/png",
+        "fileSize": 113424,
+        "isFeatured": false,
+        "position": 11,
+        "altText": "Premium Foam Flowers Pack (100pcs) - Maroon",
+        "label": "maroon"
+      },
+      {
+        "relPath": "products/foam-flowers/premium-foam-flowers-pack-peach.png",
+        "absPath": "C:\\me nestham by bhanni\\backend\\src\\scripts\\data_images\\products\\foam-flowers\\premium-foam-flowers-pack-peach.png",
+        "width": 260,
+        "height": 300,
+        "mimeType": "image/png",
+        "fileSize": 125317,
+        "isFeatured": false,
+        "position": 12,
+        "altText": "Premium Foam Flowers Pack (100pcs) - Peach",
+        "label": "peach"
+      },
+      {
+        "relPath": "products/foam-flowers/premium-foam-flowers-pack-coral.png",
+        "absPath": "C:\\me nestham by bhanni\\backend\\src\\scripts\\data_images\\products\\foam-flowers\\premium-foam-flowers-pack-coral.png",
+        "width": 260,
+        "height": 300,
+        "mimeType": "image/png",
+        "fileSize": 122485,
+        "isFeatured": false,
+        "position": 13,
+        "altText": "Premium Foam Flowers Pack (100pcs) - Coral",
+        "label": "coral"
+      },
+      {
+        "relPath": "products/foam-flowers/premium-foam-flowers-pack-gold.png",
+        "absPath": "C:\\me nestham by bhanni\\backend\\src\\scripts\\data_images\\products\\foam-flowers\\premium-foam-flowers-pack-gold.png",
+        "width": 260,
+        "height": 300,
+        "mimeType": "image/png",
+        "fileSize": 129193,
+        "isFeatured": false,
+        "position": 14,
+        "altText": "Premium Foam Flowers Pack (100pcs) - Gold",
+        "label": "gold"
+      },
+      {
+        "relPath": "products/foam-flowers/premium-foam-flowers-pack-pink.png",
+        "absPath": "C:\\me nestham by bhanni\\backend\\src\\scripts\\data_images\\products\\foam-flowers\\premium-foam-flowers-pack-pink.png",
+        "width": 260,
+        "height": 300,
+        "mimeType": "image/png",
+        "fileSize": 119361,
+        "isFeatured": false,
+        "position": 15,
+        "altText": "Premium Foam Flowers Pack (100pcs) - Pink",
+        "label": "pink"
+      },
+      {
+        "relPath": "products/foam-flowers/premium-foam-flowers-pack-orange.png",
+        "absPath": "C:\\me nestham by bhanni\\backend\\src\\scripts\\data_images\\products\\foam-flowers\\premium-foam-flowers-pack-orange.png",
+        "width": 260,
+        "height": 300,
+        "mimeType": "image/png",
+        "fileSize": 119494,
+        "isFeatured": false,
+        "position": 16,
+        "altText": "Premium Foam Flowers Pack (100pcs) - Orange",
+        "label": "orange"
+      },
+      {
+        "relPath": "products/foam-flowers/premium-foam-flowers-pack-light-blue.png",
+        "absPath": "C:\\me nestham by bhanni\\backend\\src\\scripts\\data_images\\products\\foam-flowers\\premium-foam-flowers-pack-light-blue.png",
+        "width": 260,
+        "height": 300,
+        "mimeType": "image/png",
+        "fileSize": 131868,
+        "isFeatured": false,
+        "position": 17,
+        "altText": "Premium Foam Flowers Pack (100pcs) - Light-blue",
+        "label": "light-blue"
+      },
+      {
+        "relPath": "products/foam-flowers/premium-foam-flowers-pack-lime-green.png",
+        "absPath": "C:\\me nestham by bhanni\\backend\\src\\scripts\\data_images\\products\\foam-flowers\\premium-foam-flowers-pack-lime-green.png",
+        "width": 260,
+        "height": 300,
+        "mimeType": "image/png",
+        "fileSize": 134644,
+        "isFeatured": false,
+        "position": 18,
+        "altText": "Premium Foam Flowers Pack (100pcs) - Lime-green",
+        "label": "lime-green"
+      },
+      {
+        "relPath": "products/foam-flowers/premium-foam-flowers-pack-purple.png",
+        "absPath": "C:\\me nestham by bhanni\\backend\\src\\scripts\\data_images\\products\\foam-flowers\\premium-foam-flowers-pack-purple.png",
+        "width": 260,
+        "height": 300,
+        "mimeType": "image/png",
+        "fileSize": 123994,
+        "isFeatured": false,
+        "position": 19,
+        "altText": "Premium Foam Flowers Pack (100pcs) - Purple",
+        "label": "purple"
+      }
+    ],
+    "handcrafted-small-gold-zari-balls": [
+      {
+        "relPath": "products/decorative-balls/handcrafted-small-gold-zari-balls-main.png",
+        "absPath": "C:\\me nestham by bhanni\\backend\\src\\scripts\\data_images\\products\\decorative-balls\\handcrafted-small-gold-zari-balls-main.png",
+        "width": 1110,
+        "height": 1000,
+        "mimeType": "image/png",
+        "fileSize": 1859904,
+        "isFeatured": true,
+        "position": 0,
+        "altText": "Handcrafted Small Gold Zari Balls (10pcs)",
+        "label": "main"
+      }
+    ],
+    "conical-golden-filigree-bells": [
+      {
+        "relPath": "products/bells/conical-golden-filigree-bells-main.png",
+        "absPath": "C:\\me nestham by bhanni\\backend\\src\\scripts\\data_images\\products\\bells\\conical-golden-filigree-bells-main.png",
+        "width": 1150,
+        "height": 1000,
+        "mimeType": "image/png",
+        "fileSize": 1504051,
+        "isFeatured": true,
+        "position": 0,
+        "altText": "Conical Golden Filigree Bells (10pcs)",
+        "label": "main"
+      }
+    ],
+    "metallic-gold-ribbon-flowers": [
+      {
+        "relPath": "products/artificial-flowers/metallic-gold-ribbon-flowers-main.png",
+        "absPath": "C:\\me nestham by bhanni\\backend\\src\\scripts\\data_images\\products\\artificial-flowers\\metallic-gold-ribbon-flowers-main.png",
+        "width": 1110,
+        "height": 1100,
+        "mimeType": "image/png",
+        "fileSize": 2452955,
+        "isFeatured": true,
+        "position": 0,
+        "altText": "Metallic Gold Ribbon Flowers",
+        "label": "main"
+      }
+    ],
+    "ribbed-barrel-plastic-spacer-beads": [
+      {
+        "relPath": "products/beads/ribbed-barrel-plastic-spacer-beads-main.png",
+        "absPath": "C:\\me nestham by bhanni\\backend\\src\\scripts\\data_images\\products\\beads\\ribbed-barrel-plastic-spacer-beads-main.png",
+        "width": 550,
+        "height": 1100,
+        "mimeType": "image/png",
+        "fileSize": 432589,
+        "isFeatured": true,
+        "position": 0,
+        "altText": "Ribbed Barrel Plastic Spacer Beads",
+        "label": "main"
+      }
+    ],
+    "ribbed-pumpkin-plastic-spacer-beads": [
+      {
+        "relPath": "products/beads/ribbed-pumpkin-plastic-spacer-beads-main.png",
+        "absPath": "C:\\me nestham by bhanni\\backend\\src\\scripts\\data_images\\products\\beads\\ribbed-pumpkin-plastic-spacer-beads-main.png",
+        "width": 550,
+        "height": 1100,
+        "mimeType": "image/png",
+        "fileSize": 277333,
+        "isFeatured": true,
+        "position": 0,
+        "altText": "Ribbed Pumpkin Plastic Spacer Beads",
+        "label": "main"
+      }
+    ],
+    "mdf-laser-cut-red-lotus-wall-hangings": [
+      {
+        "relPath": "products/decorative-items/mdf-laser-cut-red-lotus-wall-hangings-main.png",
+        "absPath": "C:\\me nestham by bhanni\\backend\\src\\scripts\\data_images\\products\\decorative-items\\mdf-laser-cut-red-lotus-wall-hangings-main.png",
+        "width": 1110,
+        "height": 1200,
+        "mimeType": "image/png",
+        "fileSize": 2182787,
+        "isFeatured": true,
+        "position": 0,
+        "altText": "MDF Laser Cut Red Lotus Wall Hangings (10pcs)",
+        "label": "main"
+      }
+    ],
+    "artificial-satin-rose-flowers": [
+      {
+        "relPath": "products/artificial-flowers/artificial-satin-rose-flowers-collage.png",
+        "absPath": "C:\\me nestham by bhanni\\backend\\src\\scripts\\data_images\\products\\artificial-flowers\\artificial-satin-rose-flowers-collage.png",
+        "width": 1142,
+        "height": 1200,
+        "mimeType": "image/png",
+        "fileSize": 1627615,
+        "isFeatured": true,
+        "position": 0,
+        "altText": "Artificial Satin Rose Flowers",
+        "label": "collage"
+      },
+      {
+        "relPath": "products/artificial-flowers/artificial-satin-rose-flowers-yellow.png",
+        "absPath": "C:\\me nestham by bhanni\\backend\\src\\scripts\\data_images\\products\\artificial-flowers\\artificial-satin-rose-flowers-yellow.png",
+        "width": 400,
+        "height": 400,
+        "mimeType": "image/png",
+        "fileSize": 170010,
+        "isFeatured": false,
+        "position": 1,
+        "altText": "Artificial Satin Rose Flowers - Yellow",
+        "label": "yellow"
+      },
+      {
+        "relPath": "products/artificial-flowers/artificial-satin-rose-flowers-white.png",
+        "absPath": "C:\\me nestham by bhanni\\backend\\src\\scripts\\data_images\\products\\artificial-flowers\\artificial-satin-rose-flowers-white.png",
+        "width": 500,
+        "height": 400,
+        "mimeType": "image/png",
+        "fileSize": 244233,
+        "isFeatured": false,
+        "position": 2,
+        "altText": "Artificial Satin Rose Flowers - White",
+        "label": "white"
+      },
+      {
+        "relPath": "products/artificial-flowers/artificial-satin-rose-flowers-pink.png",
+        "absPath": "C:\\me nestham by bhanni\\backend\\src\\scripts\\data_images\\products\\artificial-flowers\\artificial-satin-rose-flowers-pink.png",
+        "width": 300,
+        "height": 150,
+        "mimeType": "image/png",
+        "fileSize": 53060,
+        "isFeatured": false,
+        "position": 3,
+        "altText": "Artificial Satin Rose Flowers - Pink",
+        "label": "pink"
+      },
+      {
+        "relPath": "products/artificial-flowers/artificial-satin-rose-flowers-red.png",
+        "absPath": "C:\\me nestham by bhanni\\backend\\src\\scripts\\data_images\\products\\artificial-flowers\\artificial-satin-rose-flowers-red.png",
+        "width": 450,
+        "height": 400,
+        "mimeType": "image/png",
+        "fileSize": 230792,
+        "isFeatured": false,
+        "position": 4,
+        "altText": "Artificial Satin Rose Flowers - Red",
+        "label": "red"
+      }
+    ],
+    "snowflake-plastic-flower-separators": [
+      {
+        "relPath": "products/plastic-flower-parts/snowflake-plastic-flower-separators-main.png",
+        "absPath": "C:\\me nestham by bhanni\\backend\\src\\scripts\\data_images\\products\\plastic-flower-parts\\snowflake-plastic-flower-separators-main.png",
+        "width": 900,
+        "height": 1200,
+        "mimeType": "image/png",
+        "fileSize": 1470383,
+        "isFeatured": true,
+        "position": 0,
+        "altText": "Snowflake Plastic Flower Separators",
+        "label": "main"
+      },
+      {
+        "relPath": "products/plastic-flower-parts/snowflake-plastic-flower-separators-packaging.png",
+        "absPath": "C:\\me nestham by bhanni\\backend\\src\\scripts\\data_images\\products\\plastic-flower-parts\\snowflake-plastic-flower-separators-packaging.png",
+        "width": 849,
+        "height": 1200,
+        "mimeType": "image/png",
+        "fileSize": 1303193,
+        "isFeatured": false,
+        "position": 1,
+        "altText": "Snowflake Plastic Flower Separators - Packaging",
+        "label": "packaging"
+      }
+    ],
+    "six-arm-cup-plastic-flower-separators": [
+      {
+        "relPath": "products/plastic-flower-parts/six-arm-cup-plastic-flower-separators-main.png",
+        "absPath": "C:\\me nestham by bhanni\\backend\\src\\scripts\\data_images\\products\\plastic-flower-parts\\six-arm-cup-plastic-flower-separators-main.png",
+        "width": 990,
+        "height": 1000,
+        "mimeType": "image/png",
+        "fileSize": 1157969,
+        "isFeatured": true,
+        "position": 0,
+        "altText": "Six-Arm Cup Plastic Flower Separators",
+        "label": "main"
+      },
+      {
+        "relPath": "products/plastic-flower-parts/six-arm-cup-plastic-flower-separators-closeup.png",
+        "absPath": "C:\\me nestham by bhanni\\backend\\src\\scripts\\data_images\\products\\plastic-flower-parts\\six-arm-cup-plastic-flower-separators-closeup.png",
+        "width": 1110,
+        "height": 1000,
+        "mimeType": "image/png",
+        "fileSize": 1008151,
+        "isFeatured": false,
+        "position": 1,
+        "altText": "Six-Arm Cup Plastic Flower Separators - Closeup",
+        "label": "closeup"
+      }
+    ],
+    "mdf-hand-painted-kamadhenu-cow-cutouts": [
+      {
+        "relPath": "products/decorative-items/mdf-hand-painted-kamadhenu-cow-cutouts-main.png",
+        "absPath": "C:\\me nestham by bhanni\\backend\\src\\scripts\\data_images\\products\\decorative-items\\mdf-hand-painted-kamadhenu-cow-cutouts-main.png",
+        "width": 1110,
+        "height": 900,
+        "mimeType": "image/png",
+        "fileSize": 805864,
+        "isFeatured": true,
+        "position": 0,
+        "altText": "MDF Hand-Painted Kamadhenu Cow Cutouts (Pair)",
+        "label": "main"
+      }
+    ],
+    "handcrafted-large-gold-zari-balls": [
+      {
+        "relPath": "products/decorative-balls/handcrafted-large-gold-zari-balls-main.png",
+        "absPath": "C:\\me nestham by bhanni\\backend\\src\\scripts\\data_images\\products\\decorative-balls\\handcrafted-large-gold-zari-balls-main.png",
+        "width": 1110,
+        "height": 1000,
+        "mimeType": "image/png",
+        "fileSize": 1143660,
+        "isFeatured": true,
+        "position": 0,
+        "altText": "Handcrafted Large Gold Zari Balls (10pcs)",
+        "label": "main"
+      }
+    ],
+    "trumpet-lily-shape-plastic-flower-separators": [
+      {
+        "relPath": "products/plastic-flower-parts/trumpet-lily-shape-plastic-flower-separators-main.png",
+        "absPath": "C:\\me nestham by bhanni\\backend\\src\\scripts\\data_images\\products\\plastic-flower-parts\\trumpet-lily-shape-plastic-flower-separators-main.png",
+        "width": 200,
+        "height": 200,
+        "mimeType": "image/png",
+        "fileSize": 9423,
+        "isFeatured": true,
+        "position": 0,
+        "altText": "Trumpet Lily Shape Plastic Flower Separators",
+        "label": "main"
+      }
+    ],
+    "eight-pointed-bud-plastic-flower-separators": [
+      {
+        "relPath": "products/plastic-flower-parts/eight-pointed-bud-plastic-flower-separators-main.png",
+        "absPath": "C:\\me nestham by bhanni\\backend\\src\\scripts\\data_images\\products\\plastic-flower-parts\\eight-pointed-bud-plastic-flower-separators-main.png",
+        "width": 200,
+        "height": 200,
+        "mimeType": "image/png",
+        "fileSize": 41997,
+        "isFeatured": true,
+        "position": 0,
+        "altText": "Eight-Pointed Bud Plastic Flower Separators",
+        "label": "main"
+      }
+    ],
+    "six-arm-bell-plastic-flower-separators": [
+      {
+        "relPath": "products/plastic-flower-parts/six-arm-bell-plastic-flower-separators-main.png",
+        "absPath": "C:\\me nestham by bhanni\\backend\\src\\scripts\\data_images\\products\\plastic-flower-parts\\six-arm-bell-plastic-flower-separators-main.png",
+        "width": 220,
+        "height": 220,
+        "mimeType": "image/png",
+        "fileSize": 68902,
+        "isFeatured": true,
+        "position": 0,
+        "altText": "Six-Arm Bell Plastic Flower Separators",
+        "label": "main"
+      }
+    ],
+    "jasmine-shape-plastic-flower-separators": [
+      {
+        "relPath": "products/plastic-flower-parts/jasmine-shape-plastic-flower-separators-main.png",
+        "absPath": "C:\\me nestham by bhanni\\backend\\src\\scripts\\data_images\\products\\plastic-flower-parts\\jasmine-shape-plastic-flower-separators-main.png",
+        "width": 220,
+        "height": 220,
+        "mimeType": "image/png",
+        "fileSize": 70485,
+        "isFeatured": true,
+        "position": 0,
+        "altText": "Jasmine Shape Plastic Flower Separators",
+        "label": "main"
+      }
+    ],
+    "kit-cotton-garland-thread-no-10": [
+      {
+        "relPath": "products/threads/kit-cotton-garland-thread-no-10-main.png",
+        "absPath": "C:\\me nestham by bhanni\\backend\\src\\scripts\\data_images\\products\\threads\\kit-cotton-garland-thread-no-10-main.png",
+        "width": 800,
+        "height": 1100,
+        "mimeType": "image/png",
+        "fileSize": 937629,
+        "isFeatured": true,
+        "position": 0,
+        "altText": "Kit Cotton Garland Thread No. 10",
+        "label": "main"
+      }
+    ]
+  }
+}

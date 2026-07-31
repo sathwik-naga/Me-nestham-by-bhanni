@@ -38,20 +38,20 @@ export default function CartDrawer({ isOpen, onClose }) {
             animate={{ x: 0 }}
             exit={{ x: "100%" }}
             transition={{ type: "spring", damping: 25, stiffness: 200 }}
-            className="fixed top-0 right-0 bottom-0 w-full sm:w-[440px] bg-brand-bg border-l border-brand-border z-50 flex flex-col shadow-2xl font-accent"
+            className="fixed top-0 right-0 bottom-0 w-full sm:w-[440px] bg-brand-modal border-l border-brand-border z-50 flex flex-col shadow-2xl font-accent"
           >
             {/* Header */}
             <div className="p-6 border-b border-brand-border flex items-center justify-between">
               <div className="flex items-center gap-2">
                 <ShoppingBag className="text-brand-primary" size={20} />
                 <h3 className="font-serif font-bold text-lg text-brand-text">Your Cart</h3>
-                <span className="bg-brand-secondary dark:bg-[#25211E] text-brand-primary text-xs font-bold px-2 py-0.5 rounded-full border border-brand-border">
+                <span className="bg-brand-secondary text-brand-primary text-xs font-bold px-2 py-0.5 rounded-full border border-brand-border">
                   {cartItems.reduce((acc, i) => acc + i.quantity, 0)}
                 </span>
               </div>
               <button 
                 onClick={onClose}
-                className="p-2 hover:bg-brand-secondary hover:dark:bg-[#2D2723] rounded-full text-brand-text-muted hover:text-brand-text"
+                className="p-2 hover:bg-brand-secondary rounded-full text-brand-text-muted hover:text-brand-text"
               >
                 <X size={20} />
               </button>
@@ -59,7 +59,7 @@ export default function CartDrawer({ isOpen, onClose }) {
 
             {/* Free Shipping Tracker */}
             {cartItems.length > 0 && (
-              <div className="px-6 py-4 bg-brand-secondary dark:bg-[#201D1B] border-b border-brand-border">
+              <div className="px-6 py-4 bg-brand-secondary border-b border-brand-border">
                 {netToFreeShipping > 0 ? (
                   <p className="text-xs text-brand-text-muted mb-2">
                     Add <span className="font-bold text-brand-primary font-mono">₹{netToFreeShipping}</span> more for <span className="font-semibold text-brand-success">FREE shipping</span>!
@@ -69,7 +69,7 @@ export default function CartDrawer({ isOpen, onClose }) {
                     🎉 Your order qualifies for free shipping!
                   </p>
                 )}
-                <div className="w-full bg-brand-border dark:bg-stone-700 h-2 rounded-full overflow-hidden">
+                <div className="w-full bg-brand-border h-2 rounded-full overflow-hidden">
                   <div 
                     className="bg-brand-primary h-full transition-all duration-500" 
                     style={{ width: `${progressPercent}%` }}
@@ -82,7 +82,7 @@ export default function CartDrawer({ isOpen, onClose }) {
             <div className="flex-1 overflow-y-auto p-6 flex flex-col gap-4">
               {cartItems.length === 0 ? (
                 <div className="flex-1 flex flex-col items-center justify-center text-center gap-4">
-                  <div className="w-20 h-20 rounded-full bg-brand-secondary dark:bg-[#25211E] border border-brand-border flex items-center justify-center text-brand-text-muted">
+                  <div className="w-20 h-20 rounded-full bg-brand-secondary border border-brand-border flex items-center justify-center text-brand-text-muted">
                     <ShoppingBag size={32} />
                   </div>
                   <div>
@@ -119,7 +119,7 @@ export default function CartDrawer({ isOpen, onClose }) {
                           {item.name}
                         </h4>
                         {item.variant && (
-                          <span className="text-[10px] bg-brand-secondary dark:bg-[#2D2723] text-brand-text-muted px-2 py-0.5 rounded border border-brand-border inline-block mt-0.5">
+                          <span className="text-[10px] bg-brand-secondary text-brand-text-muted px-2 py-0.5 rounded border border-brand-border inline-block mt-0.5">
                             {item.variant}
                           </span>
                         )}
@@ -173,7 +173,7 @@ export default function CartDrawer({ isOpen, onClose }) {
 
             {/* Footer Summary (if cart has items) */}
             {cartItems.length > 0 && (
-              <div className="p-6 border-t border-brand-border bg-brand-secondary dark:bg-[#201D1B] flex flex-col gap-4">
+              <div className="p-6 border-t border-brand-border bg-brand-secondary flex flex-col gap-4">
                 <div className="flex items-center justify-between text-sm">
                   <span className="font-semibold text-brand-text-muted">Estimated Subtotal</span>
                   <span className="font-mono font-bold text-base text-brand-primary">₹{subtotal}</span>

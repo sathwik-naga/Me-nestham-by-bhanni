@@ -8,10 +8,8 @@ export const getHealth = async (
   next: NextFunction
 ): Promise<void> => {
   try {
-    let dbStatus = 'healthy';
-    let dbError: string | null = null;
+    let isConnected = true;
 
-    // Ping Supabase to check connectivity
     try {
       const { error } = await supabase
         .from('categories')
@@ -19,29 +17,21 @@ export const getHealth = async (
         .limit(1);
 
       if (error) {
-        dbStatus = 'unhealthy';
-        dbError = error.message;
+        isConnected = false;
         logger.error(`Database health check failed: ${error.message}`);
       }
-    } catch (err: unknown) {
-      dbStatus = 'unhealthy';
-      dbError = err instanceof Error ? err.message : 'Unknown database connection error';
-      logger.error(`Database connectivity error: ${dbError}`);
+    } catch (err: any) {
+      isConnected = false;
+      logger.error(`Database connectivity exception: ${err?.message || err}`);
     }
 
-    const healthStatus = {
-      status: dbStatus === 'healthy' ? 'OK' : 'DEGRADED',
-      timestamp: new Date().toISOString(),
-      uptime: process.uptime(),
-      services: {
-        database: {
-          status: dbStatus,
-          error: dbError,
-        },
-      },
+    const payload = {
+      status: isConnected ? 'ok' : 'degraded',
+      database: isConnected ? 'connected' : 'disconnected',
+      version: '1.0.0',
     };
 
-    res.status(dbStatus === 'healthy' ? 200 : 503).json(healthStatus);
+    res.status(isConnected ? 200 : 503).json(payload);
   } catch (error) {
     next(error);
   }

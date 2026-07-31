@@ -1,19 +1,54 @@
-import React from "react";
-import { db } from "../../services/db";
-import { TrendingUp, Award, Users, ShoppingBag } from "lucide-react";
+import React, { useState, useEffect } from "react";
+import { getProducts } from "../../services/supabase/products";
+import { getOrders } from "../../services/supabase/orders";
+import { getCategories } from "../../services/supabase/categories";
+import { TrendingUp, Award, Users, ShoppingBag, Loader2 } from "lucide-react";
 
 export default function AdminAnalytics() {
-  const products = db.getProducts();
-  const orders = db.getOrders();
-  const categories = db.getCategories();
+  const [products, setProducts] = useState([]);
+  const [orders, setOrders] = useState([]);
+  const [categories, setCategories] = useState([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    async function loadData() {
+      try {
+        setLoading(true);
+        const [prods, ordsData, cats] = await Promise.all([
+          getProducts(),
+          getOrders(1, 100),
+          getCategories()
+        ]);
+        setProducts(prods || []);
+        setOrders(ordsData?.orders || []);
+        setCategories(cats || []);
+      } catch (err) {
+        console.error("Failed to load analytics data:", err);
+      } finally {
+        setLoading(false);
+      }
+    }
+    loadData();
+  }, []);
+
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center py-20 font-accent text-brand-text">
+        <div className="flex flex-col items-center gap-3">
+          <Loader2 className="w-8 h-8 animate-spin text-brand-primary" />
+          <span className="text-xs font-semibold text-brand-text-muted">Loading business analytics...</span>
+        </div>
+      </div>
+    );
+  }
 
   // Revenue computations
-  const totalRevenue = orders.reduce((sum, o) => sum + (o.paymentStatus === "Paid" || o.paymentStatus === "Paid on Delivery (COD)" ? o.total : 0), 0);
+  const totalRevenue = orders.reduce((sum, o) => sum + (o.paymentStatus === "Paid" ? o.total : 0), 0);
   
   // Calculate products by revenue
   const productRevenueMap = {};
   orders.forEach(ord => {
-    ord.items.forEach(item => {
+    ord.items?.forEach(item => {
       productRevenueMap[item.name] = (productRevenueMap[item.name] || 0) + (item.price * item.quantity);
     });
   });
@@ -26,16 +61,15 @@ export default function AdminAnalytics() {
   // Category revenue split
   const categorySplit = {};
   orders.forEach(ord => {
-    ord.items.forEach(item => {
-      // Find category slug matching product
-      const prod = products.find(p => p.id === item.id);
+    ord.items?.forEach(item => {
+      const prod = products.find(p => p.id === item.id || p.name === item.name);
       const catSlug = prod ? prod.category : "other";
       categorySplit[catSlug] = (categorySplit[catSlug] || 0) + (item.price * item.quantity);
     });
   });
 
   const categoryRevenue = Object.entries(categorySplit).map(([slug, rev]) => {
-    const name = categories.find(c => c.slug === slug)?.name || "Other";
+    const name = categories.find(c => c.slug === slug || c.id === slug)?.name || "Other";
     return { name, revenue: rev };
   });
 
