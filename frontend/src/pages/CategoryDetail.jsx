@@ -87,7 +87,7 @@ export default function CategoryDetail() {
   if (minRating > 0) activeChips.push({ label: `Rating: ${minRating}★ +`, remove: () => setMinRating(0) });
   if (inStockOnly) activeChips.push({ label: "In Stock Only", remove: () => setInStockOnly(false) });
 
-  const collectionSchema = generateCollectionPageSchema(currentCategory, filteredProducts.length);
+  const collectionSchema = generateCollectionPageSchema(currentCategory, displayProducts.length);
   const breadcrumbsSchema = generateBreadcrumbSchema([
     { name: "Home", url: "/" },
     { name: "Categories", url: "/categories" },
@@ -395,3 +395,5 @@ export default function CategoryDetail() {
     </div>
   );
 }
+
+
