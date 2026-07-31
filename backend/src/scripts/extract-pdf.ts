@@ -1,4 +1,3 @@
-import { pdf } from 'pdf-to-img';
 import { Jimp } from 'jimp';
 import * as fs from 'fs';
 import * as path from 'path';
@@ -22,6 +21,7 @@ interface ImageMetadata {
 }
 
 async function renderPdfPages() {
+  const { pdf } = await import('pdf-to-img');
   console.log('Rendering PDF pages to PNG...');
   if (!fs.existsSync(PAGES_DIR)) {
     fs.mkdirSync(PAGES_DIR, { recursive: true });
