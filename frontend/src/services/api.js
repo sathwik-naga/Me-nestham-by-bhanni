@@ -1,6 +1,16 @@
 import { clearAuthSession, isTokenExpired } from "../utils/authHelper";
 
-const API_URL = import.meta.env.VITE_API_URL || "http://localhost:5000/api";
+/**
+ * Helper to dynamically resolve and normalize the Express API URL
+ * Guarantees '/api' path suffix regardless of trailing slash or missing '/api' in VITE_API_URL
+ */
+export function getApiUrl() {
+  const envUrl = import.meta.env.VITE_API_URL || "http://localhost:5000/api";
+  const trimmed = envUrl.replace(/\/+$/, "");
+  return trimmed.endsWith("/api") ? trimmed : `${trimmed}/api`;
+}
+
+export const API_URL = getApiUrl();
 
 const activeControllers = new Set();
 let isLoggingOut = false;

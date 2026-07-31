@@ -1,11 +1,12 @@
 import { supabase } from "../lib/supabase";
+import { getApiUrl } from "./api";
 
 export const BUCKET_NAME = "product-images";
 export const MAX_FILE_SIZE_BYTES = 5 * 1024 * 1024; // 5 MB
 export const ALLOWED_EXTENSIONS = ["jpg", "jpeg", "png", "webp"];
 export const ALLOWED_MIME_TYPES = ["image/jpeg", "image/jpg", "image/png", "image/webp"];
 
-const API_URL = "http://localhost:5000/api";
+const API_URL = getApiUrl();
 
 /**
  * Validates file type and 5 MB size limit

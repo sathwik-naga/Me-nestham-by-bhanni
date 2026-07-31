@@ -1,7 +1,7 @@
 import express, { Express, Request, Response } from 'express';
 import morgan from 'morgan';
 import logger from './utils/logger';
-import { registerSecurityMiddleware } from './middleware/security';
+import { registerSecurityMiddleware, corsSecurityMiddleware } from './middleware/security';
 import { apiLimiter } from './middleware/rateLimiter';
 import { errorHandler, AppError } from './middleware/error';
 
@@ -24,6 +24,9 @@ const app: Express = express();
 
 // Register Central Security Hardening (Trust Proxy, Disable X-Powered-By, Helmet, CORS, Compression Filter, HPP, 1MB JSON)
 registerSecurityMiddleware(app);
+
+// Explicit OPTIONS preflight handler for all routes
+app.options('*', corsSecurityMiddleware);
 
 // Morgan HTTP request logging integrated with Winston logger
 const morganMiddleware = morgan(

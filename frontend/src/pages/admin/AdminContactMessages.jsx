@@ -3,7 +3,7 @@ import {
   Search, Filter, Eye, Trash2, Mail, CheckCircle, Clock, 
   Download, Archive, ChevronLeft, ChevronRight, RefreshCw, X, MessageSquare, Reply
 } from "lucide-react";
-import { api, showToast } from "../../services/api";
+import { api, showToast, getApiUrl } from "../../services/api";
 
 export default function AdminContactMessages() {
   const [messages, setMessages] = useState([]);
@@ -84,7 +84,7 @@ export default function AdminContactMessages() {
 
   const handleExportCsv = () => {
     const token = localStorage.getItem("access_token");
-    const exportUrl = `${import.meta.env.VITE_API_URL || "http://localhost:5000/api"}/admin/contact-messages/export-csv?search=${encodeURIComponent(search)}&status=${statusFilter}`;
+    const exportUrl = `${getApiUrl()}/admin/contact-messages/export-csv?search=${encodeURIComponent(search)}&status=${statusFilter}`;
     
     // Trigger download via temporary link or fetch with bearer token
     fetch(exportUrl, {
