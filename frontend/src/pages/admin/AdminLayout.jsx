@@ -5,7 +5,7 @@ import { useAuth } from "../../context/AuthContext";
 import { api } from "../../services/api";
 import { 
   LayoutDashboard, ShoppingBag, FolderTree, ClipboardList, 
-  Users, Tag, ShieldAlert, BarChart3, LogOut, ArrowLeft, User, Mail, MessageCircle
+  Users, Tag, ShieldAlert, BarChart3, LogOut, ArrowLeft, User, Mail, MessageCircle, Activity, ShieldCheck
 } from "lucide-react";
 
 export default function AdminLayout() {
@@ -39,6 +39,8 @@ export default function AdminLayout() {
 
   const adminMenu = [
     { path: "/admin", label: "Dashboard", icon: <LayoutDashboard size={16} />, exact: true },
+    { path: "/admin/observability", label: "System Observability", icon: <Activity size={16} /> },
+    { path: "/admin/audit-logs", label: "Audit Logs", icon: <ShieldCheck size={16} /> },
     { path: "/admin/products", label: "Products", icon: <ShoppingBag size={16} /> },
     { path: "/admin/categories", label: "Categories", icon: <FolderTree size={16} /> },
     { path: "/admin/orders", label: "Orders", icon: <ClipboardList size={16} /> },

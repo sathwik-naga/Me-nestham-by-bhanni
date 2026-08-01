@@ -20,6 +20,8 @@ import adminRoutes from './routes/admin.routes';
 import contactRoutes from './routes/contact.routes';
 import sitemapRoute from './routes/sitemap.route';
 
+import observabilityRoutes from './modules/observability/observability.routes';
+
 const app: Express = express();
 
 // Register Central Security Hardening (Trust Proxy, Disable X-Powered-By, Helmet, CORS, Compression Filter, HPP, 1MB JSON)
@@ -39,9 +41,8 @@ const morganMiddleware = morgan(
 );
 app.use(morganMiddleware);
 
-// Un-ratelimited System Health Checks (For monitoring / load balancers)
-app.use('/health', healthRoutes);
-app.use('/api/health', healthRoutes);
+// Un-ratelimited System Health Checks & Observability Endpoints (For load balancers / monitoring)
+app.use('/', observabilityRoutes);
 
 // Sitemap XML Endpoints
 app.use('/sitemap.xml', sitemapRoute);
@@ -51,6 +52,7 @@ app.use('/api/sitemap.xml', sitemapRoute);
 app.use('/api', apiLimiter);
 
 // API Routes
+app.use('/api', observabilityRoutes);
 app.use('/api/auth', authRoutes);
 app.use('/api/categories', categoryRoutes);
 app.use('/api/products', productRoutes);

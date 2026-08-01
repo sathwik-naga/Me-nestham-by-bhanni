@@ -2,6 +2,7 @@ import app from './app';
 import env from './config/env';
 import logger from './utils/logger';
 import { checkDatabaseHealth } from './utils/dbHealthCheck';
+import { cronMaintenance } from './services/cron.service';
 
 let server: any;
 
@@ -15,6 +16,9 @@ export const bootstrap = async (): Promise<void> => {
   } catch (err) {
     logger.error(`Database health check failed: ${err}`);
   }
+
+  // Start background maintenance engine (Module 6)
+  cronMaintenance.startMaintenanceEngine();
 
   server = app.listen(env.PORT, () => {
     logger.info(`⚡️ Server is running at http://localhost:${env.PORT} in ${env.NODE_ENV} mode`);

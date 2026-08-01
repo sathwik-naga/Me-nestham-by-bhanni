@@ -45,6 +45,7 @@ const AdminInventory = lazy(() => import("./pages/admin/AdminInventory"));
 const AdminAnalytics = lazy(() => import("./pages/admin/AdminAnalytics"));
 const AdminEmailLogs = lazy(() => import("./pages/admin/AdminEmailLogs"));
 const AdminContactMessages = lazy(() => import("./pages/admin/AdminContactMessages"));
+const AdminObservability = lazy(() => import("./pages/admin/AdminObservability"));
 
 // Consumer Layout Wrapper
 function StorefrontLayout() {
@@ -165,6 +166,8 @@ export default function App() {
             <Route path="coupons" element={<AdminCoupons />} />
             <Route path="inventory" element={<AdminInventory />} />
             <Route path="analytics" element={<AdminAnalytics />} />
+            <Route path="observability" element={<AdminObservability />} />
+            <Route path="audit-logs" element={<AdminObservability />} />
             <Route path="emails" element={<AdminEmailLogs />} />
             <Route path="contact-messages" element={<AdminContactMessages />} />
           </Route>
