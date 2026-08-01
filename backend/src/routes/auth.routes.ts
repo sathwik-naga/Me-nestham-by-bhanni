@@ -5,9 +5,13 @@ import { validate } from '../middleware/validate';
 import { registerSchema, loginSchema } from '../validators/auth.validator';
 
 import { registerLimiter, loginLimiter, forgotPasswordLimiter } from '../middleware/rateLimiter';
+import otpRoutes from '../modules/otp/otp.routes';
 
 const router = Router();
 const authController = new AuthController();
+
+// OTP Module Endpoints (/api/auth/send-email-otp, /api/auth/verify-email-otp, etc.)
+router.use('/', otpRoutes);
 
 router.post('/register', registerLimiter, validate(registerSchema), (req, res, next) => authController.register(req, res, next));
 router.post('/login', loginLimiter, validate(loginSchema), (req, res, next) => authController.login(req, res, next));

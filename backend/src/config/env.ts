@@ -19,6 +19,14 @@ const envSchema = z.object({
   RAZORPAY_KEY_SECRET: z.string().optional(),
   RAZORPAY_WEBHOOK_SECRET: z.string().optional(),
   OPENAI_API_KEY: z.string().optional(),
+  OTP_EXPIRY_MINUTES: z.coerce.number().default(5),
+  OTP_MAX_ATTEMPTS: z.coerce.number().default(5),
+  OTP_RESEND_LIMIT: z.coerce.number().default(3),
+  SMTP_HOST: z.string().optional(),
+  SMTP_PORT: z.coerce.number().optional().default(587),
+  SMTP_USER: z.string().optional(),
+  SMTP_PASS: z.string().optional(),
+  SMTP_FROM: z.string().optional().default('Me Nestham By Bhanni <noreply@menesthambybhanni.com>'),
 });
 
 type Env = z.infer<typeof envSchema>;

@@ -71,3 +71,26 @@ export const contactLimiter = rateLimit({
   legacyHeaders: false,
   handler: rateLimitHandler('Too many contact form submissions. Please try again in an hour.'),
 });
+
+/**
+ * OTP Send / Resend Rate Limiter: 5 requests / 15 minutes
+ */
+export const otpSendLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  max: 5,
+  standardHeaders: true,
+  legacyHeaders: false,
+  handler: rateLimitHandler('Too many OTP generation requests. Please try again in 15 minutes.'),
+});
+
+/**
+ * OTP Verification Rate Limiter: 10 requests / 15 minutes
+ */
+export const otpVerifyLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  max: 10,
+  standardHeaders: true,
+  legacyHeaders: false,
+  handler: rateLimitHandler('Too many OTP verification attempts. Please try again in 15 minutes.'),
+});
+
