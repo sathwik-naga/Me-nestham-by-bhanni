@@ -165,46 +165,56 @@ export default function Policies() {
               </div>
 
               <div>
-                <h3 className="font-serif text-base font-bold text-brand-text mb-2">10. Third-Party Services</h3>
-                <p>Our website may integrate with trusted third-party services for payment processing, authentication, hosting, analytics, and logistics. These services have their own privacy policies, and we encourage you to review them before using their services.</p>
-              </div>
-
-              <div>
-                <h3 className="font-serif text-base font-bold text-brand-text mb-2">11. International Data Transfers</h3>
-                <p>Your information may be processed or stored using secure cloud infrastructure located in different jurisdictions. We take reasonable steps to ensure appropriate safeguards are in place for such transfers.</p>
-              </div>
-
-              <div>
-                <h3 className="font-serif text-base font-bold text-brand-text mb-2">12. Legal Compliance</h3>
-                <p className="mb-2">We may disclose personal information when required to:</p>
-                <ul className="list-disc pl-5 flex flex-col gap-1">
-                  <li>Comply with applicable laws and regulations</li>
-                  <li>Respond to lawful requests from government authorities</li>
-                  <li>Protect our legal rights</li>
-                  <li>Investigate fraud or security issues</li>
-                  <li>Enforce our Terms and Conditions</li>
+                <h3 className="font-serif text-base font-bold text-brand-text mb-2">10. Third-Party Services & Authentication Providers</h3>
+                <p>Our website integrates with trusted third-party service providers for payment processing, authentication, hosting, analytics, and logistics:</p>
+                <ul className="list-disc pl-5 flex flex-col gap-1 mt-2">
+                  <li><strong>Authentication:</strong> Users may sign in using Google OAuth or Email/Password handled securely via Supabase Auth.</li>
+                  <li><strong>Analytics:</strong> We use Google Analytics and performance monitoring tools to measure traffic and optimize website usability.</li>
+                  <li><strong>Payment Gateways:</strong> Payments are processed via PCI-DSS compliant providers (e.g. Razorpay).</li>
                 </ul>
+                <p className="mt-2">These third-party providers have their own independent privacy policies, and we encourage you to review them.</p>
               </div>
 
               <div>
-                <h3 className="font-serif text-base font-bold text-brand-text mb-2">13. Your Choices</h3>
-                <p className="mb-2">You may:</p>
-                <ul className="list-disc pl-5 flex flex-col gap-1">
-                  <li>Update your account information</li>
-                  <li>Change your communication preferences</li>
-                  <li>Delete your account (subject to legal retention requirements)</li>
-                  <li>Disable cookies through your browser settings</li>
-                </ul>
+                <h3 className="font-serif text-base font-bold text-brand-text mb-2">11. Email Communications & Marketing Choices</h3>
+                <p className="mb-2"><strong>Transactional Communications:</strong> Essential order confirmations, shipping updates, password reset links, and 2FA verification codes are sent regardless of your marketing preferences to ensure order fulfillment and account security.</p>
+                <p><strong>Marketing Communications:</strong> If you receive promotional emails or newsletters, you may opt out at any time by clicking the "Unsubscribe" link in the email or by contacting us.</p>
               </div>
 
               <div>
-                <h3 className="font-serif text-base font-bold text-brand-text mb-2">14. Changes to This Privacy Policy</h3>
+                <h3 className="font-serif text-base font-bold text-brand-text mb-2">12. Data Breach Response</h3>
+                <p>We maintain technical security controls to prevent data loss. In the unlikely event of a qualifying security incident or data breach that affects your personal information, we will notify affected users and relevant authorities where required by applicable law in a timely manner.</p>
+              </div>
+
+              <div>
+                <h3 className="font-serif text-base font-bold text-brand-text mb-2">13. User Account Deletion & Data Retention</h3>
+                <p>You may request the permanent deletion of your user account and personal data at any time by submitting a request to <a href="mailto:funnycolours123@gmail.com" className="text-brand-primary font-bold hover:underline">funnycolours123@gmail.com</a>. Upon verification, your account profile and credentials will be removed. Please note that certain order history and financial transaction records must be retained for mandatory statutory tax and accounting retention periods as required by Indian tax laws.</p>
+              </div>
+
+              <div>
+                <h3 className="font-serif text-base font-bold text-brand-text mb-2">14. Business Transfers</h3>
+                <p>In the event that <strong>Me Nestham By Bhanni</strong> undergoes a merger, acquisition, reorganization, bankruptcy, or sale of company assets, customer personal information may be transferred as part of the business transaction to the acquiring entity, subject to the commitments made in this Privacy Policy.</p>
+              </div>
+
+              <div>
+                <h3 className="font-serif text-base font-bold text-brand-text mb-2">15. International Data Transfers</h3>
+                <p>Your information may be processed or stored using secure cloud infrastructure located in different jurisdictions. We take reasonable steps to ensure appropriate technical safeguards are in place for such transfers.</p>
+              </div>
+
+              <div>
+                <h3 className="font-serif text-base font-bold text-brand-text mb-2">16. Legal Compliance & Governing Law</h3>
+                <p className="mb-2">This Privacy Policy is governed by and construed in accordance with the <strong>laws of India</strong>.</p>
+                <p>We may disclose personal information when required to comply with applicable statutory laws, law enforcement warrants, or court orders in India.</p>
+              </div>
+
+              <div>
+                <h3 className="font-serif text-base font-bold text-brand-text mb-2">17. Changes to This Privacy Policy</h3>
                 <p>We may update this Privacy Policy from time to time to reflect changes in our business, technology, legal requirements, or services.</p>
                 <p className="mt-2">When significant changes are made, the updated policy will be posted on this page with a revised <strong>Last Updated</strong> date. Continued use of our website after changes become effective constitutes acceptance of the revised policy.</p>
               </div>
 
               <div>
-                <h3 className="font-serif text-base font-bold text-brand-text mb-2">15. Contact Us</h3>
+                <h3 className="font-serif text-base font-bold text-brand-text mb-2">18. Contact Us</h3>
                 <p className="mb-2">If you have any questions, concerns, or requests regarding this Privacy Policy or your personal information, please contact us:</p>
                 <div className="p-4 bg-brand-secondary/60 border border-brand-border rounded-2xl flex flex-col gap-1">
                   <p><strong>Business Name:</strong> Me Nestham By Bhanni</p>
@@ -214,7 +224,7 @@ export default function Policies() {
               </div>
 
               <div>
-                <h3 className="font-serif text-base font-bold text-brand-text mb-2">16. Consent</h3>
+                <h3 className="font-serif text-base font-bold text-brand-text mb-2">19. Consent</h3>
                 <p>By accessing or using our website, creating an account, or placing an order, you acknowledge that you have read, understood, and agreed to this Privacy Policy.</p>
               </div>
             </div>
