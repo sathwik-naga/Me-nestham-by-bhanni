@@ -1,5 +1,3 @@
-export type OTPChannel = 'email' | 'phone';
-
 export interface SendEmailOTPPayload {
   email: string;
   userId?: string;
@@ -16,27 +14,10 @@ export interface ResendEmailOTPPayload {
   userId?: string;
 }
 
-export interface SendPhoneOTPPayload {
-  phone: string;
-  userId?: string;
-}
-
-export interface VerifyPhoneOTPPayload {
-  phone: string;
-  otp: string;
-  userId?: string;
-}
-
-export interface ResendPhoneOTPPayload {
-  phone: string;
-  userId?: string;
-}
-
 export interface OTPRecord {
   id: string;
   user_id?: string | null;
-  email?: string | null;
-  phone?: string | null;
+  email: string;
   otp_hash: string;
   attempts: number;
   resend_count: number;

@@ -61,54 +61,16 @@ export class OTPController {
   };
 
   /**
-   * POST /api/auth/send-phone-otp
+   * POST /api/auth/cleanup-otps (Admin / Cron trigger)
    */
-  public sendPhoneOTP = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+  public cleanupOTPs = async (_req: Request, res: Response, next: NextFunction): Promise<void> => {
     try {
-      const result = await this.otpService.sendPhoneOTP(req.body);
+      const cleanedCount = await this.otpService.cleanupExpiredOTPs();
       res.status(200).json({
         success: true,
-        message: result.message,
+        message: `Successfully cleaned up ${cleanedCount} expired or stale OTP records.`,
         data: {
-          expiresAt: result.expiresAt,
-          resendCount: result.resendCount,
-        },
-      });
-    } catch (error) {
-      next(error);
-    }
-  };
-
-  /**
-   * POST /api/auth/verify-phone-otp
-   */
-  public verifyPhoneOTP = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
-    try {
-      const result = await this.otpService.verifyPhoneOTP(req.body);
-      res.status(200).json({
-        success: true,
-        message: result.message,
-        data: {
-          verifiedAt: result.verifiedAt,
-        },
-      });
-    } catch (error) {
-      next(error);
-    }
-  };
-
-  /**
-   * POST /api/auth/resend-phone-otp
-   */
-  public resendPhoneOTP = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
-    try {
-      const result = await this.otpService.resendPhoneOTP(req.body);
-      res.status(200).json({
-        success: true,
-        message: result.message,
-        data: {
-          expiresAt: result.expiresAt,
-          resendCount: result.resendCount,
+          cleanedCount,
         },
       });
     } catch (error) {
