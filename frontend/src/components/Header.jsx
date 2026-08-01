@@ -130,6 +130,10 @@ export default function Header({ onCartClick }) {
           <NavLink to="/contact" className={({ isActive }) => `hover:text-brand-primary transition-colors ${isActive ? 'text-brand-primary font-semibold' : ''}`}>
             Contact
           </NavLink>
+
+          <NavLink to="/policies/shipping" className={({ isActive }) => `hover:text-brand-primary transition-colors ${isActive ? 'text-brand-primary font-semibold' : ''}`}>
+            Policies
+          </NavLink>
         </div>
 
         {/* Right Side: Search, Wishlist, Cart, Profile, Theme Toggle */}
@@ -351,6 +355,9 @@ export default function Header({ onCartClick }) {
                 </Link>
                 <Link to="/contact" onClick={() => setMobileMenuOpen(false)} className="hover:text-brand-primary flex items-center gap-3">
                   📞 Contact support
+                </Link>
+                <Link to="/policies/shipping" onClick={() => setMobileMenuOpen(false)} className="hover:text-brand-primary flex items-center gap-3">
+                  📜 Legal & Policies
                 </Link>
               </div>
 
