@@ -4,11 +4,13 @@ import logger from '../utils/logger';
 interface MemoryCacheEntry {
   value: any;
   expiresAt: number;
+  tags?: string[];
 }
 
 export class CacheService {
   private static instance: CacheService;
   private memoryCache: Map<string, MemoryCacheEntry> = new Map();
+  private tagMap: Map<string, Set<string>> = new Map(); // Tag -> Set of Cache Keys
   private isUpstashConfigured: boolean = false;
   private upstashUrl: string = '';
   private upstashToken: string = '';
@@ -21,7 +23,7 @@ export class CacheService {
     if (this.isUpstashConfigured) {
       logger.info('🔴 CacheService initialized with Upstash Redis REST API.');
     } else {
-      logger.info('🧠 CacheService running in High-Performance In-Memory Cache mode (No Upstash credentials configured).');
+      logger.info('🧠 CacheService running in High-Performance In-Memory Cache mode with Tag Invalidation.');
     }
   }
 
@@ -33,10 +35,33 @@ export class CacheService {
   }
 
   /**
-   * Get item from cache (Tries Upstash Redis first, falls back to Memory Cache)
+   * Standard Cache Key Conventions
+   */
+  public static KEYS = {
+    HOME: 'home:v1',
+    CATEGORIES_ALL: 'categories:all',
+    FEATURED_PRODUCTS: 'featured-products',
+    BESTSELLER_PRODUCTS: 'bestseller-products',
+    PRODUCT_SLUG: (slug: string) => `product:${slug}`,
+    PRODUCT_ID: (id: string) => `product:id:${id}`,
+    COUPONS_ACTIVE: 'coupons:active',
+    SETTINGS_GLOBAL: 'settings:global',
+  };
+
+  /**
+   * Standard Cache Tags for Targeted Invalidation
+   */
+  public static TAGS = {
+    PRODUCT: 'tag:product',
+    CATEGORY: 'tag:category',
+    COUPON: 'tag:coupon',
+    SETTINGS: 'tag:settings',
+  };
+
+  /**
+   * Get item from cache (Upstash Redis -> Memory Cache -> Fallback Database)
    */
   public async get<T>(key: string): Promise<T | null> {
-    // 1. Try Upstash Redis if configured
     if (this.isUpstashConfigured) {
       try {
         const response = await fetch(`${this.upstashUrl}/get/${encodeURIComponent(key)}`, {
@@ -56,11 +81,11 @@ export class CacheService {
           }
         }
       } catch (err: any) {
-        logger.warn(`Upstash Redis GET failed for key ${key}, falling back to memory cache: ${err?.message}`);
+        logger.warn(`Upstash Redis GET failed for key ${key}, gracefully falling back to memory cache: ${err?.message}`);
       }
     }
 
-    // 2. Memory Cache fallback
+    // Memory Cache fallback
     const entry = this.memoryCache.get(key);
     if (!entry) return null;
 
@@ -73,12 +98,17 @@ export class CacheService {
   }
 
   /**
-   * Set item in cache with TTL (seconds)
+   * Set item in cache with TTL and optional Tag registration
    */
-  public async set(key: string, value: any, ttlSeconds: number = 300): Promise<void> {
+  public async set(key: string, value: any, ttlSeconds: number = 300, tags: string[] = []): Promise<void> {
     const serialized = typeof value === 'string' ? value : JSON.stringify(value);
 
-    // 1. Upstash Redis set
+    // Register tags
+    tags.forEach((tag) => {
+      if (!this.tagMap.has(tag)) this.tagMap.set(tag, new Set());
+      this.tagMap.get(tag)!.add(key);
+    });
+
     if (this.isUpstashConfigured) {
       try {
         await fetch(`${this.upstashUrl}/set/${encodeURIComponent(key)}/${encodeURIComponent(serialized)}/EX/${ttlSeconds}`, {
@@ -91,9 +121,23 @@ export class CacheService {
       }
     }
 
-    // 2. Always maintain local memory cache backup
     const expiresAt = Date.now() + ttlSeconds * 1000;
-    this.memoryCache.set(key, { value, expiresAt });
+    this.memoryCache.set(key, { value, expiresAt, tags });
+  }
+
+  /**
+   * Invalidate all cache keys associated with a specific Tag (e.g. CacheService.TAGS.PRODUCT)
+   */
+  public async invalidateTag(tag: string): Promise<void> {
+    const keysToInvalidate = this.tagMap.get(tag);
+    if (keysToInvalidate) {
+      const keyArray = Array.from(keysToInvalidate);
+      await this.del(keyArray);
+      this.tagMap.delete(tag);
+      logger.info(`CacheService: Invalidated ${keyArray.length} keys for tag "${tag}".`);
+    } else {
+      await this.invalidateAll();
+    }
   }
 
   /**
@@ -119,10 +163,11 @@ export class CacheService {
   }
 
   /**
-   * Invalidate cache matching pattern (e.g. 'mn_cache_*')
+   * Invalidate cache matching pattern
    */
   public async invalidateAll(): Promise<void> {
     this.memoryCache.clear();
+    this.tagMap.clear();
     logger.info('CacheService: All in-memory and Redis caches invalidated.');
   }
 }

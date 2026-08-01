@@ -22,6 +22,8 @@ import sitemapRoute from './routes/sitemap.route';
 
 import observabilityRoutes from './modules/observability/observability.routes';
 
+import { maintenanceMiddleware } from './middleware/maintenance.middleware';
+
 const app: Express = express();
 
 // Register Central Security Hardening (Trust Proxy, Disable X-Powered-By, Helmet, CORS, Compression Filter, HPP, 1MB JSON)
@@ -41,6 +43,9 @@ const morganMiddleware = morgan(
 );
 app.use(morganMiddleware);
 
+// Maintenance Mode Safeguard (Phase 5.7)
+app.use(maintenanceMiddleware);
+
 // Un-ratelimited System Health Checks & Observability Endpoints (For load balancers / monitoring)
 app.use('/', observabilityRoutes);
 
@@ -50,20 +55,21 @@ app.use('/api/sitemap.xml', sitemapRoute);
 
 // Apply General Rate Limiter to all API routes (200 req / 15 min)
 app.use('/api', apiLimiter);
+app.use('/api/v1', apiLimiter);
 
-// API Routes
-app.use('/api', observabilityRoutes);
-app.use('/api/auth', authRoutes);
-app.use('/api/categories', categoryRoutes);
-app.use('/api/products', productRoutes);
-app.use('/api/cart', cartRoutes);
-app.use('/api/orders', orderRoutes);
-app.use('/api/payments', paymentRoutes);
-app.use('/api/shipping', shippingRoutes);
-app.use('/api/emails', emailRoutes);
-app.use('/api/promotions', promotionRoutes);
-app.use('/api/contact', contactRoutes);
-app.use('/api/admin', adminRoutes);
+// API v1 Versioning Aliases & Routes (Phase 5.7)
+app.use(['/api', '/api/v1'], observabilityRoutes);
+app.use(['/api/auth', '/api/v1/auth'], authRoutes);
+app.use(['/api/categories', '/api/v1/categories'], categoryRoutes);
+app.use(['/api/products', '/api/v1/products'], productRoutes);
+app.use(['/api/cart', '/api/v1/cart'], cartRoutes);
+app.use(['/api/orders', '/api/v1/orders'], orderRoutes);
+app.use(['/api/payments', '/api/v1/payments'], paymentRoutes);
+app.use(['/api/shipping', '/api/v1/shipping'], shippingRoutes);
+app.use(['/api/emails', '/api/v1/emails'], emailRoutes);
+app.use(['/api/promotions', '/api/v1/promotions'], promotionRoutes);
+app.use(['/api/contact', '/api/v1/contact'], contactRoutes);
+app.use(['/api/admin', '/api/v1/admin'], adminRoutes);
 
 // Catch 404 and forward to error handler
 app.use((req: Request, _res: Response, next) => {
