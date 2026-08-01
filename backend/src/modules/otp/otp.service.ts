@@ -294,6 +294,7 @@ export class OTPService {
     const expiresAt = new Date(record.expires_at);
 
     if (now > expiresAt) {
+      logger.warn(`SECURITY AUDIT: 2FA OTP expired for ${email}`);
       await supabaseAdmin
         .from('email_otps')
         .update({ is_invalidated: true, updated_at: now.toISOString() })
@@ -304,6 +305,7 @@ export class OTPService {
 
     // 3. Max Attempts Check
     if (record.attempts >= env.OTP_MAX_ATTEMPTS) {
+      logger.warn(`SECURITY AUDIT: Max 2FA OTP verification attempts reached for ${email}`);
       await supabaseAdmin
         .from('email_otps')
         .update({ is_invalidated: true, updated_at: now.toISOString() })
@@ -318,6 +320,7 @@ export class OTPService {
     if (!isMatch) {
       const newAttempts = record.attempts + 1;
       const remainingAttempts = env.OTP_MAX_ATTEMPTS - newAttempts;
+      logger.warn(`SECURITY AUDIT: Failed 2FA OTP verification attempt for ${email} (${remainingAttempts} remaining)`);
 
       await supabaseAdmin
         .from('email_otps')
@@ -337,6 +340,7 @@ export class OTPService {
 
     // 5. Success -> Mark verified & invalidated
     const verifiedAt = new Date();
+    logger.info(`SECURITY AUDIT: 2FA OTP verified successfully for ${email}`);
     await supabaseAdmin
       .from('email_otps')
       .update({
