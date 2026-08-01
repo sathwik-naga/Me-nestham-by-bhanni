@@ -67,13 +67,15 @@ export default function Policies() {
 
               <div>
                 <h3 className="font-serif text-base font-bold text-brand-text mb-2">7. Damaged or Lost Shipments</h3>
-                <p>If your package arrives visibly damaged or appears to be lost during transit, please contact us within <strong>48 hours</strong> of the expected delivery date with your order details and supporting photographs (if applicable). We will work with the courier partner to investigate the issue and provide an appropriate resolution where possible.</p>
+                <p className="mb-2">If your package arrives visibly damaged or appears to be lost during transit, please contact us within <strong>48 hours</strong> of the expected delivery date with your order details and supporting photographs (if applicable).</p>
+                <p>Reporting a damaged or lost shipment allows us to investigate the issue with the courier partner. Any resolution will be determined after verification and in accordance with applicable law.</p>
               </div>
 
               <div className="p-4 bg-amber-500/10 border border-amber-500/40 rounded-2xl">
                 <h3 className="font-serif text-base font-bold text-amber-600 mb-2">8. No Return, No Refund, and No Exchange Policy</h3>
                 <p className="font-bold text-brand-text uppercase tracking-wider mb-2">All sales are final.</p>
                 <p className="mb-2">Due to the nature of our products, <strong>Me Nestham By Bhanni does not accept returns, refunds, or exchanges</strong> once an order has been placed and shipped.</p>
+                <p className="mb-2 text-brand-text font-semibold">Products that are damaged due to misuse, improper handling, or normal wear and tear after delivery are not eligible for replacement, return, or refund.</p>
                 <p className="mb-2">Please review your order carefully before completing your purchase, including:</p>
                 <ul className="list-disc pl-5 flex flex-col gap-1 text-brand-text">
                   <li>Product selection</li>
