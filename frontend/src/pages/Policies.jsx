@@ -9,16 +9,98 @@ export default function Policies() {
       case "shipping":
         return {
           title: "Shipping & Delivery Policy",
-          lastUpdated: "July 12, 2026",
+          lastUpdated: "August 1, 2026",
           content: (
-            <>
-              <h3>1. Shipping Coverage</h3>
-              <p>We ship nationwide across India. Currently, international dispatch services are not supported. All products are dispatched from our regional artisan cooperative warehouse hubs in Rajasthan, Telangana, and Jaipur.</p>
-              <h3>2. Timelines and Schedules</h3>
-              <p>Standard delivery timelines range between 3 to 5 business days for metropolitan regions, and up to 7 business days for remote pin codes. Express shipments are delivered in 1-2 business days.</p>
-              <h3>3. Carrier Fees</h3>
-              <p>Shipping is free for all order sub-totals exceeding ₹499. Orders below ₹499 carry a flat delivery convenience surcharge of ₹99. Express delivery options, when requested, carry a flat ₹150 surcharge.</p>
-            </>
+            <div className="flex flex-col gap-6 text-brand-text text-xs md:text-sm leading-relaxed">
+              <div>
+                <p className="font-semibold text-brand-text"><strong>Effective Date:</strong> August 1, 2026</p>
+                <p className="font-semibold text-brand-text"><strong>Last Updated:</strong> August 1, 2026</p>
+              </div>
+
+              <div>
+                <p>Thank you for shopping with <strong>Me Nestham By Bhanni</strong>. We are committed to delivering your orders safely and as quickly as possible. Please read this Shipping Policy carefully before placing an order.</p>
+              </div>
+
+              <div>
+                <h3 className="font-serif text-base font-bold text-brand-text mb-2">1. Order Processing</h3>
+                <ul className="list-disc pl-5 flex flex-col gap-1">
+                  <li>Orders are processed after successful payment confirmation.</li>
+                  <li>Orders are typically processed within <strong>1–3 business days</strong>.</li>
+                  <li>Orders are not processed on Sundays or public holidays.</li>
+                  <li>During sales, festivals, or periods of high demand, processing times may be longer.</li>
+                </ul>
+              </div>
+
+              <div>
+                <h3 className="font-serif text-base font-bold text-brand-text mb-2">2. Shipping</h3>
+                <p className="mb-2">We currently ship across <strong>India</strong> through trusted courier partners.</p>
+                <p>Shipping charges, if applicable, will be displayed during checkout before you complete your purchase.</p>
+              </div>
+
+              <div>
+                <h3 className="font-serif text-base font-bold text-brand-text mb-2">3. Estimated Delivery Time</h3>
+                <p className="mb-2">Estimated delivery times are:</p>
+                <ul className="list-disc pl-5 flex flex-col gap-1">
+                  <li><strong>Metro Cities:</strong> 2–5 business days</li>
+                  <li><strong>Other Cities &amp; Towns:</strong> 3–7 business days</li>
+                  <li><strong>Remote Locations:</strong> 5–10 business days</li>
+                </ul>
+                <p className="mt-2 text-brand-text-muted text-[11px]">These are estimated delivery times and may vary depending on courier operations, weather conditions, public holidays, or other circumstances beyond our control.</p>
+              </div>
+
+              <div>
+                <h3 className="font-serif text-base font-bold text-brand-text mb-2">4. Order Tracking</h3>
+                <p>Once your order has been shipped, you will receive tracking details via email, SMS, or WhatsApp (where available), allowing you to monitor the delivery status of your package.</p>
+              </div>
+
+              <div>
+                <h3 className="font-serif text-base font-bold text-brand-text mb-2">5. Delivery Attempts</h3>
+                <p className="mb-2">Our courier partners may make multiple delivery attempts. If delivery cannot be completed due to an incorrect address, repeated unavailability, or refusal to accept the package, the order may be returned to us.</p>
+                <p>Additional shipping charges may apply if re-delivery is requested.</p>
+              </div>
+
+              <div>
+                <h3 className="font-serif text-base font-bold text-brand-text mb-2">6. Incorrect Shipping Information</h3>
+                <p className="mb-2">Customers are responsible for providing accurate shipping information.</p>
+                <p>We are not responsible for delays or failed deliveries resulting from incorrect or incomplete addresses, incorrect phone numbers, or other inaccurate information provided during checkout.</p>
+              </div>
+
+              <div>
+                <h3 className="font-serif text-base font-bold text-brand-text mb-2">7. Damaged or Lost Shipments</h3>
+                <p>If your package arrives visibly damaged or appears to be lost during transit, please contact us within <strong>48 hours</strong> of the expected delivery date with your order details and supporting photographs (if applicable). We will work with the courier partner to investigate the issue and provide an appropriate resolution where possible.</p>
+              </div>
+
+              <div className="p-4 bg-amber-500/10 border border-amber-500/40 rounded-2xl">
+                <h3 className="font-serif text-base font-bold text-amber-600 mb-2">8. No Return, No Refund, and No Exchange Policy</h3>
+                <p className="font-bold text-brand-text uppercase tracking-wider mb-2">All sales are final.</p>
+                <p className="mb-2">Due to the nature of our products, <strong>Me Nestham By Bhanni does not accept returns, refunds, or exchanges</strong> once an order has been placed and shipped.</p>
+                <p className="mb-2">Please review your order carefully before completing your purchase, including:</p>
+                <ul className="list-disc pl-5 flex flex-col gap-1 text-brand-text">
+                  <li>Product selection</li>
+                  <li>Quantity</li>
+                  <li>Size or variant (if applicable)</li>
+                  <li>Shipping address</li>
+                  <li>Contact information</li>
+                </ul>
+                <p className="mt-2">Orders cannot be cancelled after they have been processed or dispatched. This policy does not affect any statutory rights you may have under applicable consumer protection laws.</p>
+              </div>
+
+              <div>
+                <h3 className="font-serif text-base font-bold text-brand-text mb-2">9. Delays Beyond Our Control</h3>
+                <p className="mb-2">We are not responsible for delivery delays caused by natural disasters, severe weather conditions, public holidays, government restrictions, transportation disruptions, courier service delays, or force majeure events.</p>
+                <p>We appreciate your patience in such situations.</p>
+              </div>
+
+              <div>
+                <h3 className="font-serif text-base font-bold text-brand-text mb-2">10. Contact Us</h3>
+                <p className="mb-2">If you have any questions regarding shipping or your order, please contact us:</p>
+                <div className="p-4 bg-brand-secondary/60 border border-brand-border rounded-2xl flex flex-col gap-1">
+                  <p><strong>Business Name:</strong> Me Nestham By Bhanni</p>
+                  <p><strong>Email:</strong> <a href="mailto:funnycolours123@gmail.com" className="text-brand-primary font-bold hover:underline">funnycolours123@gmail.com</a></p>
+                </div>
+                <p className="mt-2">We will make reasonable efforts to assist you with shipping-related inquiries.</p>
+              </div>
+            </div>
           )
         };
 
