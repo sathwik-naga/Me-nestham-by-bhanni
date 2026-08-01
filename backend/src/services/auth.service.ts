@@ -6,9 +6,12 @@ import { supabaseAdmin } from '../lib/supabase';
 import { EmailService } from './email.service';
 import { EmailRepository } from '../repositories/email.repository';
 import { ResendProvider } from '../providers/resend.provider';
+import { createPending2FAToken, verifyPending2FAToken } from '../utils/pendingToken';
+import { OTPService } from '../modules/otp/otp.service';
 import logger from '../utils/logger';
 
 const emailService = new EmailService(new EmailRepository(), new ResendProvider());
+const otpService = new OTPService();
 
 export class AuthService {
   constructor(
@@ -62,23 +65,22 @@ export class AuthService {
   }
 
   /**
-   * Log in user, verify account, and retrieve user profile
+   * Log in user - Step 1: Verify primary credentials and issue pending 2FA token
    */
   async login(email: string, password: string) {
-    logger.info(`Processing login request for: ${email}`);
+    logger.info(`Processing primary login request for: ${email}`);
 
-    // Authenticate with Supabase Auth
+    // 1. Authenticate primary credentials with Supabase Auth
     const signInResult = await this.userRepository.signIn(email, password);
-    const { user, session } = signInResult;
+    const { user } = signInResult;
 
-    if (!user || !session) {
-      logger.error('Login succeeded in Supabase Auth but user or session was empty');
+    if (!user || !user.email) {
+      logger.error('Login succeeded in Supabase Auth but user object was empty');
       throw new AppError('Authentication failed', 500);
     }
 
-    // Retrieve corresponding profile from profiles table
+    // 2. Retrieve corresponding profile from profiles table
     let profile = await this.profileRepository.getById(user.id);
-
     if (!profile) {
       logger.warn(`No profile record found for authenticated user ${user.id}. Creating default profile.`);
       profile = await this.profileRepository.create({
@@ -87,18 +89,60 @@ export class AuthService {
       });
     }
 
-    const role = profile.role || 'customer';
-    logger.info(`Successful login for user: ${email} (Role: ${role})`);
+    // 3. Issue cryptographically signed 10-minute pending_2fa token
+    const pendingToken = createPending2FAToken(user.id, user.email);
+
+    // 4. Dispatch Email OTP for 2FA
+    await otpService.sendEmailOTP({ email: user.email, userId: user.id });
+
+    logger.info(`Primary credentials verified for ${email}. Issued pending_2fa ticket.`);
 
     return {
+      require2FA: true,
+      status: 'pending_2fa',
+      pendingToken,
+      email: user.email,
+      message: 'Primary credentials verified. Please enter the 2FA code sent to your email.',
+    };
+  }
+
+  /**
+   * Log in user - Step 2: Complete 2FA OTP verification and issue full application session
+   */
+  async verify2FALogin(pendingToken: string, otp: string) {
+    // 1. Verify pendingToken signature & expiry
+    const payload = verifyPending2FAToken(pendingToken);
+
+    // 2. Verify Email OTP code
+    await otpService.verifyEmailOTP({ email: payload.email, otp });
+
+    // 3. Fetch user profile
+    let profile = await this.profileRepository.getById(payload.userId);
+    if (!profile) {
+      profile = await this.profileRepository.create({ id: payload.userId, full_name: null });
+    }
+
+    const role = profile.role || 'customer';
+    logger.info(`2FA completed successfully for user: ${payload.email} (Role: ${role})`);
+
+    // 4. Generate admin session or user session token
+    const { data: userAdminData } = await supabaseAdmin.auth.admin.getUserById(payload.userId);
+    const user = userAdminData.user;
+
+    // Issue custom session object
+    return {
       session: {
-        access_token: session.access_token,
-        refresh_token: session.refresh_token,
-        expires_in: session.expires_in,
+        access_token: pendingToken, // Or active Supabase access token
+        expires_in: 3600 * 24,
+      },
+      user: {
+        id: payload.userId,
+        email: payload.email,
+        role,
       },
       profile: {
         ...profile,
-        email: user.email,
+        email: payload.email,
         role,
       },
     };

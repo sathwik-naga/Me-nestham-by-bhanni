@@ -147,43 +147,100 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
+  const [pending2FA, setPending2FA] = useState(null);
+
   const signInWithGoogle = () => signInWithProvider("google");
 
   /**
-   * Email / Password Login
+   * Email / Password Login with 2FA Waterfall Interception
    */
   const signInWithEmail = async (email, password) => {
     setLoading(true);
     setAuthNotification(null);
     try {
-      const { data, error } = await supabase.auth.signInWithPassword({ email, password });
+      // 1. Authenticate via Backend 2FA Waterfall Endpoint
+      const response = await api.post('/auth/login', { email, password });
 
-      if (error) {
-        // Fall back to backend auth REST service
-        const loggedUser = await authService.login(email, password);
-        setUser(loggedUser);
-        const fullProfile = authService.getUserProfile(loggedUser.id);
-        setProfile(fullProfile);
-        trackAuth("login");
+      if (response && response.data?.require2FA) {
+        // Pause login lifecycle, set pending2FA state, DO NOT grant full access token yet
+        setPending2FA({
+          pendingToken: response.data.pendingToken,
+          email: response.data.email,
+        });
         setLoading(false);
-        return loggedUser;
+        return { require2FA: true, email: response.data.email };
       }
 
-      if (data.session) {
-        setSession(data.session);
-        localStorage.setItem("access_token", data.session.access_token);
-        await syncUserProfile(data.user, "email");
+      // If backend returns immediate session fallback
+      if (response?.data?.session) {
+        setSession(response.data.session);
+        localStorage.setItem("access_token", response.data.session.access_token);
+        setUser(response.data.user);
+        setProfile(response.data.profile);
         trackAuth("login");
       }
 
       setLoading(false);
-      return data.user;
+      return response?.data?.user;
     } catch (err) {
       console.error("Login failed:", err);
       setAuthNotification({ type: "error", message: err.message || "Invalid credentials." });
       setLoading(false);
       throw err;
     }
+  };
+
+  /**
+   * Complete 2FA Verification and grant full application access
+   */
+  const submit2FAOTP = async (otpCode) => {
+    if (!pending2FA?.pendingToken) {
+      throw new Error("No active 2FA session found. Please sign in again.");
+    }
+
+    setLoading(true);
+    try {
+      const response = await api.post('/auth/verify-2fa-login', {
+        pendingToken: pending2FA.pendingToken,
+        otp: otpCode,
+      });
+
+      if (response && response.data?.session) {
+        const { session, user: authUser, profile: authProfile } = response.data;
+        setSession(session);
+        localStorage.setItem("access_token", session.access_token);
+        setUser(authUser);
+        setProfile(authProfile);
+        localStorage.setItem("mn_current_user", JSON.stringify(authUser));
+        setPending2FA(null);
+        trackAuth("login_2fa_success");
+        setLoading(false);
+        return authUser;
+      }
+
+      throw new Error("2FA verification succeeded but session token was not returned.");
+    } catch (err) {
+      setLoading(false);
+      throw err;
+    }
+  };
+
+  /**
+   * Resend 2FA Email OTP Code
+   */
+  const resend2FAOTP = async () => {
+    if (!pending2FA?.email) {
+      throw new Error("No active 2FA email context found.");
+    }
+    return api.post('/auth/resend-email-otp', { email: pending2FA.email });
+  };
+
+  /**
+   * Cancel active 2FA login session
+   */
+  const cancel2FA = () => {
+    setPending2FA(null);
+    setLoading(false);
   };
 
   /**
@@ -359,8 +416,12 @@ export const AuthProvider = ({ children }) => {
         loading,
         authNotification,
         setAuthNotification,
+        pending2FA,
+        submit2FAOTP,
+        resend2FAOTP,
+        cancel2FA,
         isAdmin: profile?.role === "admin" || user?.role === "admin",
-        isAuthenticated: !!user,
+        isAuthenticated: !!user && !pending2FA,
         signInWithProvider,
         signInWithGoogle,
         signInWithEmail,

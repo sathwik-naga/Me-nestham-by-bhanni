@@ -6,12 +6,13 @@ import { useAuth } from "../context/AuthContext";
 import { Mail, Lock, User, Phone, CheckCircle, AlertTriangle } from "lucide-react";
 import SEO from "../components/SEO/SEO";
 import GoogleLoginButton from "../components/GoogleLoginButton";
+import OTP2FAModal from "../components/Auth/OTP2FAModal";
 
 export default function Auth() {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
 
-  const { login, signup, signInWithGoogle, authNotification, user } = useAuth();
+  const { login, signup, signInWithGoogle, authNotification, user, pending2FA, submit2FAOTP, resend2FAOTP, cancel2FA } = useAuth();
 
   const handleRedirect = useCallback(() => {
     const savedRedirect = sessionStorage.getItem("redirectAfterLogin");
@@ -368,6 +369,21 @@ export default function Auth() {
           </div>
         )}
       </div>
+
+      {/* 2FA Secondary Verification Modal */}
+      {pending2FA && (
+        <OTP2FAModal
+          email={pending2FA.email}
+          pendingToken={pending2FA.pendingToken}
+          onVerifySuccess={async (otpCode) => {
+            await submit2FAOTP(otpCode);
+            setSuccessMsg("2FA Verification Successful! Redirecting...");
+            setTimeout(() => handleRedirect(), 500);
+          }}
+          onCancel={cancel2FA}
+          onResendOTP={resend2FAOTP}
+        />
+      )}
     </div>
   );
 }

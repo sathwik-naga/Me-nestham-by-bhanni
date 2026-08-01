@@ -15,6 +15,7 @@ router.use('/', otpRoutes);
 
 router.post('/register', registerLimiter, validate(registerSchema), (req, res, next) => authController.register(req, res, next));
 router.post('/login', loginLimiter, validate(loginSchema), (req, res, next) => authController.login(req, res, next));
+router.post('/verify-2fa-login', (req, res, next) => authController.verify2FALogin(req, res, next));
 router.post('/forgot-password', forgotPasswordLimiter, (req, res, next) => authController.forgotPassword(req, res, next));
 router.post('/reset-password', authMiddleware, (req, res, next) => authController.resetPassword(req, res, next));
 router.post('/logout', authMiddleware, (req, res, next) => authController.logout(req, res, next));

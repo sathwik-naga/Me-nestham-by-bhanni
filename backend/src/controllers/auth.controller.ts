@@ -38,7 +38,29 @@ export class AuthController {
 
       res.status(200).json({
         status: 'success',
-        message: 'Logged in successfully',
+        message: result.message || 'Primary authentication successful',
+        data: result,
+      });
+    } catch (error) {
+      next(error);
+    }
+  }
+
+  /**
+   * POST /api/auth/verify-2fa-login
+   */
+  async verify2FALogin(req: Request, res: Response, next: NextFunction): Promise<void> {
+    try {
+      const { pendingToken, otp } = req.body;
+      if (!pendingToken || !otp) {
+        throw new AppError('pendingToken and OTP are required', 400);
+      }
+
+      const result = await authService.verify2FALogin(pendingToken, otp);
+
+      res.status(200).json({
+        status: 'success',
+        message: '2FA authentication complete. Session granted.',
         data: result,
       });
     } catch (error) {
