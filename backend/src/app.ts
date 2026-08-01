@@ -43,6 +43,22 @@ const morganMiddleware = morgan(
 );
 app.use(morganMiddleware);
 
+// Production Root Health Check Endpoints (For Render Deployment Health Checks)
+app.get('/', (_req: Request, res: Response) => {
+  res.status(200).json({
+    success: true,
+    service: 'Me Nestham By Bhanni Backend',
+    status: 'healthy',
+    environment: process.env.NODE_ENV || 'production',
+    version: process.env.npm_package_version || '1.0.0',
+    timestamp: new Date().toISOString(),
+  });
+});
+
+app.head('/', (_req: Request, res: Response) => {
+  res.status(200).end();
+});
+
 // Maintenance Mode Safeguard (Phase 5.7)
 app.use(maintenanceMiddleware);
 
