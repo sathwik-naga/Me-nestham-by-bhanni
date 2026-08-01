@@ -5,6 +5,31 @@ import { AuditService } from './audit.service';
 
 export class ObservabilityController {
   /**
+   * GET / & HEAD / - Root Health Check for Render Deployment
+   */
+  public getRootHealth = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+    try {
+      const payload = {
+        success: true,
+        service: 'Me Nestham By Bhanni Backend',
+        status: 'healthy',
+        environment: process.env.NODE_ENV || 'production',
+        version: process.env.npm_package_version || '1.0.0',
+        timestamp: new Date().toISOString(),
+      };
+
+      if (req.method === 'HEAD') {
+        res.status(200).end();
+        return;
+      }
+
+      res.status(200).json(payload);
+    } catch (error) {
+      next(error);
+    }
+  };
+
+  /**
    * GET /api/health - Detailed System Overview
    */
   public getSystemOverview = async (_req: Request, res: Response, next: NextFunction): Promise<void> => {

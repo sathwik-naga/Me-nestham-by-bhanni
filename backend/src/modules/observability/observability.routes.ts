@@ -5,6 +5,10 @@ import { authMiddleware, roleMiddleware } from '../../middleware/auth';
 const router = Router();
 const controller = new ObservabilityController();
 
+// Root Health Check Endpoints (For Render deployment health checks)
+router.get('/', controller.getRootHealth);
+router.head('/', controller.getRootHealth);
+
 // Public Health Check APIs (Module 4)
 router.get('/health', controller.getSystemOverview);
 router.get('/health/database', controller.getDatabaseHealth);
