@@ -18,6 +18,7 @@ router.post('/login', loginLimiter, validate(loginSchema), (req, res, next) => a
 router.post('/verify-2fa-login', (req, res, next) => authController.verify2FALogin(req, res, next));
 router.post('/forgot-password', forgotPasswordLimiter, (req, res, next) => authController.forgotPassword(req, res, next));
 router.post('/reset-password', authMiddleware, (req, res, next) => authController.resetPassword(req, res, next));
+router.post('/revoke-all-sessions', authMiddleware, (req, res, next) => authController.revokeAllSessions(req, res, next));
 router.post('/logout', authMiddleware, (req, res, next) => authController.logout(req, res, next));
 router.get('/me', authMiddleware, (req, res, next) => authController.me(req, res, next));
 router.get('/users', authMiddleware, roleMiddleware('admin'), (req, res, next) => authController.listUsers(req, res, next));

@@ -193,4 +193,24 @@ export class AuthController {
       next(error);
     }
   }
+
+  /**
+   * POST /api/auth/revoke-all-sessions
+   */
+  async revokeAllSessions(req: Request, res: Response, next: NextFunction): Promise<void> {
+    try {
+      if (!req.user) {
+        throw new AppError('Unauthorized: Active session required', 401);
+      }
+
+      await authService.revokeAllSessions(req.user.id);
+
+      res.status(200).json({
+        status: 'success',
+        message: 'All active sessions across all devices have been revoked.',
+      });
+    } catch (error) {
+      next(error);
+    }
+  }
 }

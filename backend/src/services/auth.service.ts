@@ -210,4 +210,17 @@ export class AuthService {
     }
     logger.info(`Password successfully reset for user ID: ${userId}`);
   }
+
+  /**
+   * Revoke all active sessions globally across all devices
+   */
+  async revokeAllSessions(userId: string): Promise<void> {
+    logger.info(`Revoking all active sessions globally for user ID: ${userId}`);
+    const { error } = await supabaseAdmin.auth.admin.signOut(userId, 'global');
+    if (error) {
+      logger.error(`Failed to revoke global sessions for user ID ${userId}: ${error.message}`);
+      throw new AppError('Failed to revoke active sessions across devices.', 500);
+    }
+    logger.info(`All active sessions successfully revoked globally for user ID: ${userId}`);
+  }
 }

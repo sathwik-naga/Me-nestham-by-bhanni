@@ -313,6 +313,22 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
+  /**
+   * Revoke all active sessions globally across all devices
+   */
+  const revokeAllSessions = async () => {
+    setLoading(true);
+    try {
+      await api.post('/auth/revoke-all-sessions');
+      showToast("All active sessions across devices have been revoked.");
+    } catch (err) {
+      console.error("Failed to revoke global sessions:", err);
+      throw err;
+    } finally {
+      await signOut();
+    }
+  };
+
   const refreshSession = async () => {
     try {
       const { data, error } = await supabase.auth.refreshSession();
@@ -427,6 +443,7 @@ export const AuthProvider = ({ children }) => {
         signInWithEmail,
         signUp,
         signOut,
+        revokeAllSessions,
         refreshSession,
         syncUserProfile,
 

@@ -16,7 +16,7 @@ export default function Profile() {
   const [searchParams, setSearchParams] = useSearchParams();
   const tabParam = searchParams.get("tab") || "profile";
 
-  const { user, profile, updateProfile, saveAddress, deleteAddress, logout } = useAuth();
+  const { user, profile, updateProfile, saveAddress, deleteAddress, logout, revokeAllSessions } = useAuth();
   const { wishlist } = useWishlist();
 
   const [activeTab, setActiveTab] = useState(tabParam);
@@ -190,6 +190,7 @@ export default function Profile() {
             { id: "orders", label: "My Orders", icon: <ShoppingBag size={16} /> },
             { id: "wishlist", label: "Wishlist", icon: <Heart size={16} /> },
             { id: "addresses", label: "Address Book", icon: <MapPin size={16} /> },
+            { id: "security", label: "Security & Sessions", icon: <Settings size={16} /> },
             { id: "settings", label: "Account Settings", icon: <Settings size={16} /> }
           ].map((item) => (
             <button
@@ -544,7 +545,53 @@ export default function Profile() {
             </div>
           )}
 
-          {/* TAB 5: Settings Panel */}
+          {/* TAB 5: Security & Active Sessions Panel */}
+          {activeTab === "security" && (
+            <div className="bg-brand-card border border-brand-border rounded-3xl p-6 shadow-sm flex flex-col gap-6">
+              <h2 className="font-serif font-bold text-lg text-brand-text border-b border-brand-border pb-3">Active Device Sessions & Security</h2>
+
+              <div className="flex flex-col gap-4 text-xs">
+                <span className="font-bold text-brand-text uppercase tracking-wider block">Current Device Session</span>
+                
+                <div className="flex items-center justify-between p-4 bg-brand-secondary/50 border border-brand-border/80 rounded-2xl">
+                  <div className="flex items-center gap-3">
+                    <div className="w-10 h-10 rounded-full bg-brand-primary/10 text-brand-primary flex items-center justify-center font-bold">
+                      💻
+                    </div>
+                    <div className="flex flex-col">
+                      <span className="font-bold text-brand-text">Active Web Browser (Current Session)</span>
+                      <span className="text-[11px] text-brand-text-muted">Authenticated via 2FA Email OTP Verification</span>
+                    </div>
+                  </div>
+                  <span className="px-3 py-1 bg-green-500/10 text-green-500 rounded-full text-[10px] font-bold uppercase tracking-wider">
+                    Current Device
+                  </span>
+                </div>
+
+                <div className="p-4 bg-amber-500/10 border border-amber-500/30 text-amber-600 rounded-2xl flex flex-col gap-2 mt-2">
+                  <span className="font-bold text-xs">Global Sign-Out Security Control</span>
+                  <p className="text-[11px] text-amber-700/80 leading-relaxed">
+                    If you suspect unauthorized access or logged into your account on a public device, you can sign out of all active sessions across every browser and phone immediately.
+                  </p>
+                </div>
+
+                <button
+                  type="button"
+                  onClick={async () => {
+                    if (window.confirm("Are you sure you want to sign out of all active sessions across all devices?")) {
+                      await revokeAllSessions();
+                      navigate("/auth");
+                    }
+                  }}
+                  className="w-full sm:w-auto self-start px-6 py-3 bg-red-600 hover:bg-red-700 text-white font-bold text-xs rounded-xl shadow-md transition-all active:scale-95 flex items-center justify-center gap-2 mt-2 cursor-pointer"
+                >
+                  Sign Out of All Devices
+                </button>
+              </div>
+            </div>
+          )}
+
+          {/* TAB 6: Settings Panel */}
           {activeTab === "settings" && (
             <div className="bg-brand-card border border-brand-border rounded-3xl p-6 shadow-sm flex flex-col gap-6">
               <h2 className="font-serif font-bold text-lg text-brand-text border-b border-brand-border pb-3">Account Security</h2>
