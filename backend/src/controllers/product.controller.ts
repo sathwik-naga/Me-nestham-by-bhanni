@@ -3,6 +3,7 @@ import { ProductService } from '../services/product.service';
 import { ProductRepository } from '../repositories/product.repository';
 import { CategoryRepository } from '../repositories/category.repository';
 import { ProductFilters } from '../interfaces/product.interface';
+import { cacheService } from '../services/cache.service';
 
 const productRepository = new ProductRepository();
 const categoryRepository = new CategoryRepository();
@@ -41,14 +42,27 @@ export class ProductController {
   async getFeatured(req: Request, res: Response, next: NextFunction): Promise<void> {
     try {
       const limit = req.query.limit ? parseInt(req.query.limit as string, 10) : 10;
-      const products = await productService.getFeaturedProducts(limit);
+      const cacheKey = `mn_cache_products_featured_${limit}`;
+      const cached = await cacheService.get<any[]>(cacheKey);
 
+      if (cached) {
+        res.setHeader('X-Cache', 'HIT');
+        res.status(200).json({
+          status: 'success',
+          results: cached.length,
+          data: { products: cached },
+        });
+        return;
+      }
+
+      const products = await productService.getFeaturedProducts(limit);
+      await cacheService.set(cacheKey, products, 300); // 5 Minutes TTL
+
+      res.setHeader('X-Cache', 'MISS');
       res.status(200).json({
         status: 'success',
         results: products.length,
-        data: {
-          products,
-        },
+        data: { products },
       });
     } catch (error) {
       next(error);
@@ -61,7 +75,23 @@ export class ProductController {
   async getBestsellers(req: Request, res: Response, next: NextFunction): Promise<void> {
     try {
       const limit = req.query.limit ? parseInt(req.query.limit as string, 10) : 10;
+      const cacheKey = `mn_cache_products_bestsellers_${limit}`;
+      const cached = await cacheService.get<any[]>(cacheKey);
+
+      if (cached) {
+        res.setHeader('X-Cache', 'HIT');
+        res.status(200).json({
+          status: 'success',
+          results: cached.length,
+          data: { products: cached },
+        });
+        return;
+      }
+
       const products = await productService.getBestsellerProducts(limit);
+      await cacheService.set(cacheKey, products, 300); // 5 Minutes TTL
+
+      res.setHeader('X-Cache', 'MISS');
 
       res.status(200).json({
         status: 'success',
@@ -124,6 +154,7 @@ export class ProductController {
   async create(req: Request, res: Response, next: NextFunction): Promise<void> {
     try {
       const product = await productService.createProduct(req.body);
+      await cacheService.invalidateAll();
       res.status(201).json({
         status: 'success',
         data: {

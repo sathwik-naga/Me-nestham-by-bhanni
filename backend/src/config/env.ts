@@ -27,6 +27,8 @@ const envSchema = z.object({
   SMTP_USER: z.string().optional(),
   SMTP_PASS: z.string().optional(),
   SMTP_FROM: z.string().optional().default('Me Nestham By Bhanni <noreply@menesthambybhanni.com>'),
+  UPSTASH_REDIS_REST_URL: z.string().optional(),
+  UPSTASH_REDIS_REST_TOKEN: z.string().optional(),
 });
 
 type Env = z.infer<typeof envSchema>;

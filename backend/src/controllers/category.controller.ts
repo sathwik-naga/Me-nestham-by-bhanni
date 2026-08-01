@@ -1,6 +1,7 @@
 import { Request, Response, NextFunction } from 'express';
 import { CategoryService } from '../services/category.service';
 import { CategoryRepository } from '../repositories/category.repository';
+import { cacheService } from '../services/cache.service';
 
 const categoryRepository = new CategoryRepository();
 const categoryService = new CategoryService(categoryRepository);
@@ -11,13 +12,27 @@ export class CategoryController {
    */
   async getAll(req: Request, res: Response, next: NextFunction): Promise<void> {
     try {
+      const cacheKey = 'mn_cache_categories_all';
+      const cached = await cacheService.get<any[]>(cacheKey);
+
+      if (cached) {
+        res.setHeader('X-Cache', 'HIT');
+        res.status(200).json({
+          status: 'success',
+          results: cached.length,
+          data: { categories: cached },
+        });
+        return;
+      }
+
       const categories = await categoryService.listCategories();
+      await cacheService.set(cacheKey, categories, 86400); // 24 Hours TTL
+
+      res.setHeader('X-Cache', 'MISS');
       res.status(200).json({
         status: 'success',
         results: categories.length,
-        data: {
-          categories,
-        },
+        data: { categories },
       });
     } catch (error) {
       next(error);
@@ -32,9 +47,7 @@ export class CategoryController {
       const category = await categoryService.getCategoryDetails(req.params.idOrSlug);
       res.status(200).json({
         status: 'success',
-        data: {
-          category,
-        },
+        data: { category },
       });
     } catch (error) {
       next(error);
@@ -47,11 +60,10 @@ export class CategoryController {
   async create(req: Request, res: Response, next: NextFunction): Promise<void> {
     try {
       const category = await categoryService.createCategory(req.body);
+      await cacheService.invalidateAll();
       res.status(201).json({
         status: 'success',
-        data: {
-          category,
-        },
+        data: { category },
       });
     } catch (error) {
       next(error);
