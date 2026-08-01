@@ -25,16 +25,199 @@ export default function Policies() {
       case "privacy":
         return {
           title: "Privacy Policy",
-          lastUpdated: "July 12, 2026",
+          lastUpdated: "August 1, 2026",
           content: (
-            <>
-              <h3>1. Data We Collect</h3>
-              <p>We collect basic billing names, contact numbers, email addresses, and shipping details to process orders, verify payments, and ship packages.</p>
-              <h3>2. Data Security</h3>
-              <p>Financial details, passwords, and transaction values are encrypted using secure PCI-DSS standards via Razorpay gateway tunnels. We never store credit/debit card numbers on our local databases.</p>
-              <h3>3. Cookies</h3>
-              <p>We use session cookies to remember shopping cart items, wishlist saves, and active profile logins.</p>
-            </>
+            <div className="flex flex-col gap-6 text-brand-text text-xs md:text-sm leading-relaxed">
+              <div>
+                <p className="font-semibold text-brand-text"><strong>Effective Date:</strong> August 1, 2026</p>
+                <p className="font-semibold text-brand-text"><strong>Last Updated:</strong> August 1, 2026</p>
+              </div>
+
+              <div>
+                <h3 className="font-serif text-base font-bold text-brand-text mb-2">1. Introduction</h3>
+                <p>Welcome to <strong>Me Nestham By Bhanni</strong> ("we," "our," or "us"). We value your privacy and are committed to protecting your personal information. This Privacy Policy explains how we collect, use, disclose, store, and safeguard your information when you visit our website, create an account, or purchase our products.</p>
+                <p className="mt-2">By using our website, you agree to the practices described in this Privacy Policy.</p>
+              </div>
+
+              <div>
+                <h3 className="font-serif text-base font-bold text-brand-text mb-2">2. Information We Collect</h3>
+                <p className="mb-2">We may collect the following categories of information:</p>
+                
+                <h4 className="font-bold text-brand-text mt-3 mb-1">Personal Information</h4>
+                <ul className="list-disc pl-5 flex flex-col gap-1">
+                  <li>Full Name</li>
+                  <li>Email Address</li>
+                  <li>Phone Number</li>
+                  <li>Shipping Address</li>
+                  <li>Billing Address</li>
+                  <li>Order History</li>
+                  <li>Account Credentials (encrypted authentication)</li>
+                  <li>Customer Support Messages</li>
+                </ul>
+
+                <h4 className="font-bold text-brand-text mt-4 mb-1">Payment Information</h4>
+                <p>Payments are securely processed through trusted third-party payment providers. We <strong>do not store</strong> your debit card, credit card, UPI PIN, CVV, or banking credentials on our servers.</p>
+
+                <h4 className="font-bold text-brand-text mt-4 mb-1">Technical Information</h4>
+                <p className="mb-2">When you use our website, we may automatically collect:</p>
+                <ul className="list-disc pl-5 flex flex-col gap-1">
+                  <li>IP Address</li>
+                  <li>Browser Type</li>
+                  <li>Device Information</li>
+                  <li>Operating System</li>
+                  <li>Pages Visited</li>
+                  <li>Time Spent on Pages</li>
+                  <li>Referring Website</li>
+                  <li>Cookies and Similar Technologies</li>
+                </ul>
+              </div>
+
+              <div>
+                <h3 className="font-serif text-base font-bold text-brand-text mb-2">3. How We Use Your Information</h3>
+                <p className="mb-2">We use your information to:</p>
+                <ul className="list-disc pl-5 flex flex-col gap-1">
+                  <li>Process and fulfill orders</li>
+                  <li>Deliver purchased products</li>
+                  <li>Verify payments</li>
+                  <li>Create and manage your account</li>
+                  <li>Provide customer support</li>
+                  <li>Send order confirmations and shipping updates</li>
+                  <li>Improve our products and services</li>
+                  <li>Prevent fraud and unauthorized activity</li>
+                  <li>Comply with applicable legal obligations</li>
+                  <li>Respond to customer inquiries</li>
+                  <li>Analyze website performance</li>
+                </ul>
+              </div>
+
+              <div>
+                <h3 className="font-serif text-base font-bold text-brand-text mb-2">4. Cookies and Tracking Technologies</h3>
+                <p className="mb-2">We use cookies and similar technologies to:</p>
+                <ul className="list-disc pl-5 flex flex-col gap-1">
+                  <li>Keep you signed in</li>
+                  <li>Remember your preferences</li>
+                  <li>Improve website performance</li>
+                  <li>Measure website traffic</li>
+                  <li>Enhance user experience</li>
+                </ul>
+                <p className="mt-2">You may disable cookies through your browser settings; however, some website features may not function properly.</p>
+              </div>
+
+              <div>
+                <h3 className="font-serif text-base font-bold text-brand-text mb-2">5. How We Share Your Information</h3>
+                <p className="mb-2">We do <strong>not sell</strong> your personal information.</p>
+                <p className="mb-2">We may share information only with trusted service providers when necessary, including:</p>
+                <ul className="list-disc pl-5 flex flex-col gap-1">
+                  <li>Payment gateway providers</li>
+                  <li>Shipping and logistics partners</li>
+                  <li>Cloud hosting providers</li>
+                  <li>Authentication providers</li>
+                  <li>Customer support tools</li>
+                  <li>Government or legal authorities when required by law</li>
+                </ul>
+                <p className="mt-2">These providers receive only the information necessary to perform their services.</p>
+              </div>
+
+              <div>
+                <h3 className="font-serif text-base font-bold text-brand-text mb-2">6. Data Security</h3>
+                <p className="mb-2">We implement reasonable administrative, technical, and organizational safeguards to protect your information, including:</p>
+                <ul className="list-disc pl-5 flex flex-col gap-1">
+                  <li>HTTPS encryption</li>
+                  <li>Secure authentication</li>
+                  <li>Encrypted data transmission</li>
+                  <li>Access controls</li>
+                  <li>Regular security monitoring</li>
+                </ul>
+                <p className="mt-2">While we strive to protect your information, no online service can guarantee absolute security.</p>
+              </div>
+
+              <div>
+                <h3 className="font-serif text-base font-bold text-brand-text mb-2">7. Data Retention</h3>
+                <p className="mb-2">We retain personal information only for as long as necessary to:</p>
+                <ul className="list-disc pl-5 flex flex-col gap-1">
+                  <li>Complete your orders</li>
+                  <li>Maintain your account</li>
+                  <li>Meet legal and tax obligations</li>
+                  <li>Resolve disputes</li>
+                  <li>Enforce our agreements</li>
+                </ul>
+                <p className="mt-2">When data is no longer required, it is securely deleted or anonymized where appropriate.</p>
+              </div>
+
+              <div>
+                <h3 className="font-serif text-base font-bold text-brand-text mb-2">8. Your Privacy Rights</h3>
+                <p className="mb-2">Depending on applicable law, you may have the right to:</p>
+                <ul className="list-disc pl-5 flex flex-col gap-1">
+                  <li>Access your personal information</li>
+                  <li>Correct inaccurate information</li>
+                  <li>Request deletion of your data</li>
+                  <li>Withdraw consent where applicable</li>
+                  <li>Object to certain processing activities</li>
+                  <li>Request a copy of your personal information</li>
+                  <li>Close your account</li>
+                </ul>
+                <p className="mt-2">To exercise these rights, contact us using the details below.</p>
+              </div>
+
+              <div>
+                <h3 className="font-serif text-base font-bold text-brand-text mb-2">9. Children's Privacy</h3>
+                <p>Our website is not intended for children under the age of 18. We do not knowingly collect personal information from children. If we become aware that such information has been collected, we will take appropriate steps to remove it.</p>
+              </div>
+
+              <div>
+                <h3 className="font-serif text-base font-bold text-brand-text mb-2">10. Third-Party Services</h3>
+                <p>Our website may integrate with trusted third-party services for payment processing, authentication, hosting, analytics, and logistics. These services have their own privacy policies, and we encourage you to review them before using their services.</p>
+              </div>
+
+              <div>
+                <h3 className="font-serif text-base font-bold text-brand-text mb-2">11. International Data Transfers</h3>
+                <p>Your information may be processed or stored using secure cloud infrastructure located in different jurisdictions. We take reasonable steps to ensure appropriate safeguards are in place for such transfers.</p>
+              </div>
+
+              <div>
+                <h3 className="font-serif text-base font-bold text-brand-text mb-2">12. Legal Compliance</h3>
+                <p className="mb-2">We may disclose personal information when required to:</p>
+                <ul className="list-disc pl-5 flex flex-col gap-1">
+                  <li>Comply with applicable laws and regulations</li>
+                  <li>Respond to lawful requests from government authorities</li>
+                  <li>Protect our legal rights</li>
+                  <li>Investigate fraud or security issues</li>
+                  <li>Enforce our Terms and Conditions</li>
+                </ul>
+              </div>
+
+              <div>
+                <h3 className="font-serif text-base font-bold text-brand-text mb-2">13. Your Choices</h3>
+                <p className="mb-2">You may:</p>
+                <ul className="list-disc pl-5 flex flex-col gap-1">
+                  <li>Update your account information</li>
+                  <li>Change your communication preferences</li>
+                  <li>Delete your account (subject to legal retention requirements)</li>
+                  <li>Disable cookies through your browser settings</li>
+                </ul>
+              </div>
+
+              <div>
+                <h3 className="font-serif text-base font-bold text-brand-text mb-2">14. Changes to This Privacy Policy</h3>
+                <p>We may update this Privacy Policy from time to time to reflect changes in our business, technology, legal requirements, or services.</p>
+                <p className="mt-2">When significant changes are made, the updated policy will be posted on this page with a revised <strong>Last Updated</strong> date. Continued use of our website after changes become effective constitutes acceptance of the revised policy.</p>
+              </div>
+
+              <div>
+                <h3 className="font-serif text-base font-bold text-brand-text mb-2">15. Contact Us</h3>
+                <p className="mb-2">If you have any questions, concerns, or requests regarding this Privacy Policy or your personal information, please contact us:</p>
+                <div className="p-4 bg-brand-secondary/60 border border-brand-border rounded-2xl flex flex-col gap-1">
+                  <p><strong>Business Name:</strong> Me Nestham By Bhanni</p>
+                  <p><strong>Email:</strong> <a href="mailto:funnycolours123@gmail.com" className="text-brand-primary font-bold hover:underline">funnycolours123@gmail.com</a></p>
+                </div>
+                <p className="mt-2">We will make reasonable efforts to respond to privacy-related requests in a timely manner.</p>
+              </div>
+
+              <div>
+                <h3 className="font-serif text-base font-bold text-brand-text mb-2">16. Consent</h3>
+                <p>By accessing or using our website, creating an account, or placing an order, you acknowledge that you have read, understood, and agreed to this Privacy Policy.</p>
+              </div>
+            </div>
           )
         };
       case "terms":
