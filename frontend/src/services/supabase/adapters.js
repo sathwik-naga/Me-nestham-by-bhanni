@@ -15,29 +15,61 @@ export function mapProduct(product) {
     images.push("/placeholder.png");
   }
 
-  // Map variants to the frontend format, supporting size/color/stock database columns
-  const variants = product.variants?.map((v) => ({
-    id: v.id,
-    type: "Variant",
-    name: v.name || [v.color, v.size].filter(Boolean).join(" / ") || "Default",
-    sku: v.sku || "",
-    price: Number(v.price || product.price),
-    sale_price: v.sale_price !== null && v.sale_price !== undefined ? Number(v.sale_price) : null,
-    stock: v.stock !== undefined ? v.stock : (v.stock_quantity || 0),
-    weight: v.weight ? Number(v.weight) : null,
-    is_default: v.is_default || false,
-    status: v.status || 'active',
-    options: v.options || [],
-    images: (v.images || []).map((img, idx) => ({
-      id: img.id || `img-${idx}`,
-      image_url: typeof img === 'string' ? img : (img.image_url || img.url || ""),
-      storage_path: typeof img === 'object' ? img.storage_path : null,
-      media_type: typeof img === 'object' ? (img.media_type || "image") : "image",
-      alt_text: typeof img === 'object' ? (img.alt_text || null) : null,
-      sort_order: typeof img === 'object' ? (img.sort_order !== undefined ? img.sort_order : (img.position !== undefined ? img.position : idx)) : idx,
-      is_primary: typeof img === 'object' ? !!img.is_primary : idx === 0,
-    }))
-  })) || [];
+  // Map variants to the frontend format, supporting all backend image shapes & option structures
+  const variants = product.variants?.map((v) => {
+    // 1. Support all possible backend image keys: variant_images, images, image_url
+    const rawImages = v.variant_images ?? v.images ?? (v.image_url ? [{ image_url: v.image_url }] : []);
+    const formattedImages = (Array.isArray(rawImages) ? rawImages : [rawImages])
+      .map((img, idx) => {
+        const url = typeof img === 'string' ? img : (img.image_url ?? img.url ?? img.src ?? "");
+        return {
+          id: (typeof img === 'object' && img?.id) ? img.id : `img-${v.id || 'var'}-${idx}`,
+          image_url: url,
+          url: url,
+          storage_path: typeof img === 'object' ? (img.storage_path || null) : null,
+          media_type: typeof img === 'object' ? (img.media_type || "image") : "image",
+          alt_text: typeof img === 'object' ? (img.alt_text || null) : null,
+          sort_order: typeof img === 'object' ? (img.sort_order ?? img.position ?? idx) : idx,
+          is_primary: typeof img === 'object' ? !!img.is_primary : idx === 0,
+        };
+      })
+      .filter(img => Boolean(img.image_url))
+      .sort((a, b) => (b.is_primary ? 1 : 0) - (a.is_primary ? 1 : 0) || a.sort_order - b.sort_order);
+
+    // 2. Normalize options & optionsMap for O(1) multi-option matching
+    let optionsList = Array.isArray(v.options) ? [...v.options] : [];
+    if (optionsList.length === 0) {
+      if (v.color) optionsList.push({ option_name: "Color", option_value: v.color });
+      if (v.size) optionsList.push({ option_name: "Size", option_value: v.size });
+      if (v.material) optionsList.push({ option_name: "Material", option_value: v.material });
+      if (v.type && v.name) optionsList.push({ option_name: v.type, option_value: v.name });
+    }
+
+    const optionsMap = {};
+    optionsList.forEach((opt) => {
+      const name = opt.option_name || opt.name;
+      const value = opt.option_value || opt.value;
+      if (name && value) {
+        optionsMap[name] = value;
+      }
+    });
+
+    return {
+      id: v.id,
+      type: v.type || "Variant",
+      name: v.name || v.variant_name || [v.color, v.size].filter(Boolean).join(" / ") || "Default",
+      sku: v.sku || "",
+      price: Number(v.price !== undefined ? v.price : product.price),
+      sale_price: v.sale_price !== null && v.sale_price !== undefined ? Number(v.sale_price) : null,
+      stock: v.stock !== undefined ? v.stock : (v.stock_quantity !== undefined ? v.stock_quantity : 0),
+      weight: v.weight ? Number(v.weight) : null,
+      is_default: !!v.is_default,
+      status: v.status || 'active',
+      options: optionsList,
+      optionsMap: optionsMap,
+      images: formattedImages
+    };
+  }) || [];
 
   return {
     id: product.id,
