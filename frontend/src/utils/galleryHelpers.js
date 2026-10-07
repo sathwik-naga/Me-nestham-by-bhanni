@@ -1,3 +1,5 @@
+import { getProductImageUrl, normalizeProductUrl } from "./imageOptimizer";
+
 /**
  * 5-Tier Fallback Priority Helper:
  * 1. Selected Variant Primary Image (is_primary = true)
@@ -23,6 +25,8 @@ export const getGalleryImages = (variant, prod) => {
 
     const urls = sortedVariantImgs
       .map(img => typeof img === 'string' ? img : (img.image_url || img.url || img.src))
+      .filter(Boolean)
+      .map(url => normalizeProductUrl(url, ""))
       .filter(Boolean);
 
     if (urls.length > 0) return urls;
@@ -31,14 +35,23 @@ export const getGalleryImages = (variant, prod) => {
   // Tier 3 & Tier 4: Product primary & gallery images
   const prodUrls = [];
 
-  const mainProdImg = prod?.image_url || prod?.image;
+  const canonicalImg = getProductImageUrl(prod);
+  if (canonicalImg && canonicalImg !== "/placeholder.png") {
+    prodUrls.push(canonicalImg);
+  }
+
+  const mainProdImg = prod?.image_url || prod?.image || prod?.featured_image;
   if (mainProdImg && typeof mainProdImg === 'string') {
-    prodUrls.push(mainProdImg);
+    const norm = normalizeProductUrl(mainProdImg, "");
+    if (norm && !prodUrls.includes(norm)) {
+      prodUrls.push(norm);
+    }
   }
 
   if (prod?.images && prod.images.length > 0) {
     prod.images.forEach(img => {
-      const url = typeof img === 'string' ? img : (img.image_url || img.url || img.src);
+      const raw = typeof img === 'string' ? img : (img.image_url || img.url || img.src);
+      const url = normalizeProductUrl(raw, "");
       if (url && !prodUrls.includes(url)) {
         prodUrls.push(url);
       }
@@ -48,7 +61,7 @@ export const getGalleryImages = (variant, prod) => {
   if (prodUrls.length > 0) return prodUrls;
 
   // Tier 5: Fallback placeholder
-  return ["/placeholder.png"];
+  return [canonicalImg || "/placeholder.png"];
 };
 
 /**

@@ -7,6 +7,8 @@ export interface Category {
   is_active: boolean;
   created_at: string;
   updated_at?: string;
+  productCount?: number;
+  product_count?: number;
 }
 
 export interface ProductImage {

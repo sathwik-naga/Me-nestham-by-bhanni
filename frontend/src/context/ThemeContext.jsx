@@ -4,14 +4,17 @@ const ThemeContext = createContext();
 
 export const ThemeProvider = ({ children }) => {
   const [theme, setTheme] = useState(() => {
-    // Check local storage
-    const savedTheme = localStorage.getItem("mn_theme");
-    if (savedTheme) return savedTheme;
-
-    // Check system preference
-    if (window.matchMedia("(prefers-color-scheme: dark)").matches) {
-      return "dark";
+    try {
+      // Check for explicitly saved user preference
+      const savedTheme = localStorage.getItem("theme") || localStorage.getItem("mn_theme");
+      if (savedTheme === "dark" || savedTheme === "light") {
+        return savedTheme;
+      }
+    } catch {
+      // Ignore storage access errors in restricted iframe/browser environments
     }
+
+    // Default theme MUST explicitly be "light" (never use prefers-color-scheme / system)
     return "light";
   });
 
@@ -19,12 +22,18 @@ export const ThemeProvider = ({ children }) => {
     const root = window.document.documentElement;
     if (theme === "dark") {
       root.classList.add("dark");
-      document.body.classList.add("dark");
+      document.body?.classList.add("dark");
     } else {
       root.classList.remove("dark");
-      document.body.classList.remove("dark");
+      document.body?.classList.remove("dark");
     }
-    localStorage.setItem("mn_theme", theme);
+
+    try {
+      localStorage.setItem("theme", theme);
+      localStorage.setItem("mn_theme", theme);
+    } catch {
+      // Ignore storage write errors
+    }
   }, [theme]);
 
   const toggleTheme = () => {

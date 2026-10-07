@@ -6,9 +6,14 @@ import TrustBadges from "../components/TrustBadges";
 import { ArrowRight, Sparkles, Star, Award, Heart } from "lucide-react";
 import { motion } from "framer-motion";
 import { api } from "../services/api";
-import heroGarlandBanner from "../assets/images/hero-garland-banner.png";
+import heroGarlandBanner from "../assets/images/hero-garland-banner.webp";
 import SEO from "../components/SEO/SEO";
 import { generateOrganizationSchema, generateWebsiteSchema } from "../utils/seo";
+import { deduplicatedFetch } from "../utils/performance";
+import { getCategories } from "../services/supabase/categories";
+import { getProducts } from "../services/supabase/products";
+import { getCategoryImageUrl } from "../utils/imageOptimizer";
+import OptimizedImage from "../components/Common/OptimizedImage";
 
 function FlashSaleSection() {
   const [flashSale, setFlashSale] = useState(null);
@@ -19,12 +24,16 @@ function FlashSaleSection() {
     let timer;
     async function loadFlashSale() {
       try {
-        const res = await api.get("/promotions/flash-sales/active");
-        if (res.data.status === "success" && res.data.data.flashSale) {
-          const sale = res.data.data.flashSale;
+        const res = await deduplicatedFetch(
+          "/promotions/flash-sales/active",
+          () => api.get("/promotions/flash-sales/active"),
+          120000 // 2 min TTL
+        );
+        if (res?.status === "success" && res.data?.flashSale) {
+          const sale = res.data.flashSale;
           setFlashSale(sale);
           
-          const serverTime = new Date(res.data.server_time).getTime();
+          const serverTime = new Date(res.data.server_time || Date.now()).getTime();
           const clientTime = Date.now();
           const drift = serverTime - clientTime;
 
@@ -104,9 +113,28 @@ function FlashSaleSection() {
 }
 
 export default function Home() {
-  const categories = db.getCategories();
-  const products = db.getProducts();
+  const [categories, setCategories] = useState([]);
+  const [products, setProducts] = useState([]);
   const jsonLd = [generateOrganizationSchema(), generateWebsiteSchema()];
+
+  // Background revalidation for fresh category & product metadata
+  useEffect(() => {
+    getCategories()
+      .then((fresh) => {
+        setCategories(Array.isArray(fresh) ? fresh : []);
+      })
+      .catch(() => {
+        setCategories([]);
+      });
+
+    getProducts()
+      .then((fresh) => {
+        setProducts(Array.isArray(fresh) ? fresh : []);
+      })
+      .catch(() => {
+        setProducts([]);
+      });
+  }, []);
 
   // Filter lists
   const newArrivals = products.filter(p => p.isNew).slice(0, 4);
@@ -185,7 +213,11 @@ export default function Home() {
               <img
                 src={heroGarlandBanner}
                 alt="Premium Garland Making Materials - Me Nestham By Bhanni"
-                loading="lazy"
+                loading="eager"
+                decoding="async"
+                fetchPriority="high"
+                width={600}
+                height={600}
                 className="w-full h-full object-cover transition-transform duration-400 ease-in-out hover:scale-[1.02]"
               />
             </div>
@@ -217,32 +249,47 @@ export default function Home() {
             </p>
           </div>
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-            {categories.map((cat, idx) => (
-              <motion.div 
-                key={cat.id}
-                whileHover={{ y: -6 }}
-                className="group relative h-80 rounded-2xl overflow-hidden border border-brand-border shadow-sm"
-              >
-                <Link to={`/categories/${cat.slug}`}>
-                  <img
-                    src={cat.image}
-                    alt={cat.name}
-                    className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
-                  />
-                  <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/30 to-transparent" />
-                  <div className="absolute bottom-6 left-6 right-6 text-white text-left font-accent">
-                    <h3 className="font-serif text-lg font-bold group-hover:text-brand-primary transition-colors">
-                      {cat.name}
-                    </h3>
-                    <p className="text-[10px] text-gray-300 font-medium tracking-wide mt-1">
-                      {cat.productCount} Premium Items
-                    </p>
-                  </div>
-                </Link>
-              </motion.div>
-            ))}
-          </div>
+          {categories.length === 0 ? (
+            <div className="text-center py-12 px-6 bg-brand-card rounded-2xl border border-brand-border max-w-md mx-auto">
+              <p className="font-serif text-lg font-bold text-brand-text mb-2">New Collections Coming Soon</p>
+              <p className="text-xs text-brand-text-muted mb-4">Our artisan catalog is being updated with fresh seasonal supplies.</p>
+              <Link to="/shop" className="text-xs font-semibold text-brand-primary hover:underline">Browse All Items &rarr;</Link>
+            </div>
+          ) : (
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+              {categories.map((cat, idx) => (
+                <motion.div 
+                  key={cat.slug}
+                  whileHover={{ y: -6 }}
+                  className="group relative h-80 rounded-2xl overflow-hidden border border-brand-border shadow-sm"
+                >
+                  <Link to={`/categories/${cat.slug}`} className="block w-full h-full">
+                    <OptimizedImage
+                      key={cat.slug}
+                      src={getCategoryImageUrl(cat.slug, cat.image, cat.name)}
+                      fallbackSrc={cat.image || cat.image_url}
+                      alt={cat.name}
+                      priority={idx < 2}
+                      width={400}
+                      height={320}
+                      aspectRatio="1 / 1"
+                      containerClassName="w-full h-full"
+                      className="group-hover:scale-110 transition-transform duration-500"
+                    />
+                    <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/30 to-transparent pointer-events-none" />
+                    <div className="absolute bottom-6 left-6 right-6 text-white text-left font-accent pointer-events-none">
+                      <h3 className="font-serif text-lg font-bold group-hover:text-brand-primary transition-colors">
+                        {cat.name}
+                      </h3>
+                      <p className="text-[10px] text-gray-300 font-medium tracking-wide mt-1">
+                        {cat.productCount} Premium Items
+                      </p>
+                    </div>
+                  </Link>
+                </motion.div>
+              ))}
+            </div>
+          )}
         </div>
       </section>
 
@@ -264,11 +311,18 @@ export default function Home() {
             </Link>
           </div>
 
-          <div className="grid grid-cols-2 lg:grid-cols-4 gap-6">
-            {newArrivals.map((prod) => (
-              <ProductCard key={prod.id} product={prod} />
-            ))}
-          </div>
+          {newArrivals.length === 0 ? (
+            <div className="text-center py-12 px-6 bg-brand-card rounded-2xl border border-brand-border max-w-md mx-auto">
+              <p className="font-serif text-lg font-bold text-brand-text mb-2">Fresh Arrivals Coming Soon</p>
+              <p className="text-xs text-brand-text-muted">Stay tuned as our craftsmen complete new handcrafted batches.</p>
+            </div>
+          ) : (
+            <div className="grid grid-cols-2 lg:grid-cols-4 gap-6">
+              {newArrivals.map((prod) => (
+                <ProductCard key={prod.id} product={prod} />
+              ))}
+            </div>
+          )}
         </div>
       </section>
 
@@ -291,11 +345,18 @@ export default function Home() {
             </Link>
           </div>
 
-          <div className="grid grid-cols-2 lg:grid-cols-4 gap-6">
-            {bestsellers.map((prod) => (
-              <ProductCard key={prod.id} product={prod} />
-            ))}
-          </div>
+          {bestsellers.length === 0 ? (
+            <div className="text-center py-12 px-6 bg-brand-card rounded-2xl border border-brand-border max-w-md mx-auto">
+              <p className="font-serif text-lg font-bold text-brand-text mb-2">Bestsellers Refresh In Progress</p>
+              <p className="text-xs text-brand-text-muted">Explore our full catalog to discover featured collections.</p>
+            </div>
+          ) : (
+            <div className="grid grid-cols-2 lg:grid-cols-4 gap-6">
+              {bestsellers.map((prod) => (
+                <ProductCard key={prod.id} product={prod} />
+              ))}
+            </div>
+          )}
         </div>
       </section>
 

@@ -2,6 +2,14 @@ const activeRequests = new Map();
 const inMemoryCache = new Map();
 
 /**
+ * Clear in-memory API caches
+ */
+export function clearApiCache() {
+  inMemoryCache.clear();
+  activeRequests.clear();
+}
+
+/**
  * Deduplicate concurrent API GET requests with identical URLs
  */
 export async function deduplicatedFetch(url, fetcher, ttlMs = 180000) {

@@ -43,13 +43,15 @@ export default function Shop() {
 useEffect(() => {
   async function loadData() {
     try {
-      const productData = await getProducts();
-      const categoryData = await getCategories();
+      const [productData, categoryData] = await Promise.all([
+        getProducts(),
+        getCategories(),
+      ]);
 
       setProducts(productData || []);
       setCategories(categoryData || []);
     } catch (err) {
-      console.error("API Error:", err);
+      console.error("API Error in Shop loadData:", err);
     }
   }
 

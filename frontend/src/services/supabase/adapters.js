@@ -1,18 +1,25 @@
+import { getProductImageUrl } from "../../utils/imageOptimizer";
+
 export function mapProduct(product) {
-  // Extract all images starting with the main image_url and then gallery images
+  const resolvedImage = getProductImageUrl(product);
+  // Extract all images starting with the main resolved image and then gallery images
   const images = [];
-  if (product.image_url) {
+  if (resolvedImage && resolvedImage !== "/placeholder.png") {
+    images.push(resolvedImage);
+  }
+  if (product.image_url && product.image_url !== resolvedImage) {
     images.push(product.image_url);
   }
   if (product.images && product.images.length > 0) {
     product.images.forEach((img) => {
-      if (img.image_url && img.image_url !== product.image_url) {
-        images.push(img.image_url);
+      const url = typeof img === 'string' ? img : (img.image_url || img.url);
+      if (url && !images.includes(url)) {
+        images.push(url);
       }
     });
   }
   if (images.length === 0) {
-    images.push("/placeholder.png");
+    images.push(resolvedImage || "/placeholder.png");
   }
 
   // Map variants to the frontend format, supporting all backend image shapes & option structures
@@ -81,7 +88,8 @@ export function mapProduct(product) {
       ? Number(product.compare_price)
       : null,
 
-    image: product.image_url || images[0] || "/placeholder.png",
+    image: resolvedImage || images[0] || "/placeholder.png",
+    image_url: resolvedImage || images[0] || "/placeholder.png",
     images: images,
 
     category: product.category?.slug || "",

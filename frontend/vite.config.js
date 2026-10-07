@@ -8,6 +8,11 @@ export default defineConfig({
   plugins: [react(), tailwindcss()],
   build: {
     target: 'es2020',
+    modulePreload: {
+      resolveDependencies(filename, deps) {
+        return deps.filter((dep) => !dep.includes('admin-'));
+      },
+    },
     cssCodeSplit: true,
     chunkSizeWarningLimit: 1000,
     rollupOptions: {

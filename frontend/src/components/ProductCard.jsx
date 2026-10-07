@@ -3,6 +3,8 @@ import { Link } from "react-router-dom";
 import { useWishlist } from "../context/WishlistContext";
 import { useCart } from "../context/CartContext";
 import { Heart, Star, ShoppingCart } from "lucide-react";
+import OptimizedImage from "./Common/OptimizedImage";
+import { getProductImageUrl } from "../utils/imageOptimizer";
 
 export default function ProductCard({ product }) {
   const { isInWishlist, toggleWishlist } = useWishlist();
@@ -20,16 +22,7 @@ export default function ProductCard({ product }) {
     toggleWishlist(product.id);
   };
 
-  const displayImage = (() => {
-    if (product.variants && product.variants.length > 0) {
-      const defaultVar = product.variants.find(v => v.is_default) || product.variants[0];
-      if (defaultVar && defaultVar.images && defaultVar.images.length > 0) {
-        const prim = defaultVar.images.find(img => typeof img === 'object' && img.is_primary);
-        return prim ? (prim.image_url || prim.url) : (typeof defaultVar.images[0] === 'string' ? defaultVar.images[0] : defaultVar.images[0].image_url);
-      }
-    }
-    return product.image || "/placeholder.png";
-  })();
+  const displayImage = getProductImageUrl(product);
 
   const handleAddToCartClick = (e) => {
     e.preventDefault();
@@ -44,17 +37,18 @@ export default function ProductCard({ product }) {
     <div className="group relative bg-brand-card border border-brand-card-border rounded-2xl overflow-hidden shadow-sm hover:shadow-xl transition-all duration-300 flex flex-col h-full font-accent">
       {/* Product Image and Overlays */}
       <div className="relative aspect-square overflow-hidden bg-brand-secondary">
-        <Link to={`/products/${product.slug}`}>
-          
-        <img
-          src={displayImage}
-          alt={product.name}
-          width="400"
-          height="400"
-          loading="lazy"
-          decoding="async"
-          className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
-        />
+        <Link to={`/products/${product.slug}`} className="block w-full h-full">
+          <OptimizedImage
+            key={product.id || product.slug}
+            src={displayImage}
+            fallbackSrc={product.image_url || product.image || "/placeholder.png"}
+            alt={product.name}
+            width={400}
+            height={400}
+            aspectRatio="1 / 1"
+            containerClassName="w-full h-full"
+            className="group-hover:scale-110 transition-transform duration-500"
+          />
         </Link>
 
         {/* Out of Stock Overlay */}

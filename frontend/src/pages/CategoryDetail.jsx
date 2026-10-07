@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from "react";
 import { useParams, Link, useSearchParams } from "react-router-dom";
 import { db } from "../services/db";
+import { getCategories } from "../services/supabase/categories";
+import { getProducts } from "../services/supabase/products";
 import ProductCard from "../components/ProductCard";
 import { SlidersHorizontal, RefreshCcw, Filter, Star } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
@@ -20,7 +22,23 @@ export default function CategoryDetail() {
   const [isLoading, setIsLoading] = useState(false);
   const [visibleCount, setVisibleCount] = useState(6);
 
-  const categories = db.getCategories();
+  const [categories, setCategories] = useState([]);
+  const [products, setProducts] = useState([]);
+
+  useEffect(() => {
+    getCategories()
+      .then((data) => {
+        setCategories(Array.isArray(data) ? data : []);
+      })
+      .catch(() => setCategories([]));
+
+    getProducts()
+      .then((data) => {
+        setProducts(Array.isArray(data) ? data : []);
+      })
+      .catch(() => setProducts([]));
+  }, []);
+
   const currentCategory = categories.find(c => c.slug === slug);
 
   // Sync category scroll states
@@ -48,7 +66,7 @@ export default function CategoryDetail() {
   };
 
   // Perform search + filtering
-  let displayProducts = db.getProducts().filter(p => p.category === slug);
+  let displayProducts = products.filter(p => p.category === slug);
 
   // Filter: Price
   displayProducts = displayProducts.filter(p => p.price <= maxPrice);
@@ -197,7 +215,7 @@ export default function CategoryDetail() {
             <div className="flex flex-col gap-2">
               {categories.filter(c => c.slug !== slug).map((cat) => (
                 <Link
-                  key={cat.id}
+                  key={cat.slug}
                   to={`/categories/${cat.slug}`}
                   className="text-xs font-semibold text-brand-text hover:text-brand-primary p-2 hover:bg-brand-secondary rounded-lg transition-colors"
                 >

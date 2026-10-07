@@ -5,8 +5,9 @@ import { deduplicatedFetch } from "../../utils/performance";
 export async function getProducts() {
   return deduplicatedFetch("/products?limit=100", async () => {
     const result = await api.get("/products?limit=100");
-    return result.data.products.map(mapProduct);
-  });
+    const rawList = result?.data?.products || [];
+    return rawList.map(mapProduct);
+  }, 60000);
 }
 
 export async function createProduct(productData) {

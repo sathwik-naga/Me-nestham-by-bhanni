@@ -90,25 +90,32 @@ export default function App() {
   useEffect(() => {
     async function syncBackendData() {
       try {
-        const [mappedProducts, categoriesData] = await Promise.all([
-          getProducts(),
-          getCategories(),
-        ]);
+        // 1. Fetch categories immediately (fast, lightweight ~3KB metadata)
+        const categoriesData = await getCategories();
+        if (Array.isArray(categoriesData)) {
+          localStorage.setItem("mn_categories", JSON.stringify(categoriesData));
+        }
 
-        // Map categories to frontend structure
-        const mappedCategories = categoriesData.map((c) => ({
-          id: c.id,
-          name: c.name,
-          slug: c.slug,
-          description: c.description || "",
-          image: c.image_url || "/placeholder.png",
-          productCount: mappedProducts.filter((p) => p.category === c.slug).length,
-        }));
+        // 2. Defer heavy products sync to idle time so it never blocks page load or category images
+        const scheduleProductSync = () => {
+          getProducts()
+            .then((mappedProducts) => {
+              if (Array.isArray(mappedProducts)) {
+                localStorage.setItem("mn_products", JSON.stringify(mappedProducts));
+              }
+            })
+            .catch((err) => {
+              console.warn("Background product sync deferred error:", err);
+            });
+        };
 
-        localStorage.setItem("mn_products", JSON.stringify(mappedProducts));
-        localStorage.setItem("mn_categories", JSON.stringify(mappedCategories));
+        if (typeof window !== "undefined" && "requestIdleCallback" in window) {
+          window.requestIdleCallback(scheduleProductSync, { timeout: 3000 });
+        } else {
+          setTimeout(scheduleProductSync, 1500);
+        }
       } catch (err) {
-        console.error("Failed to sync products and categories from backend:", err);
+        console.error("Failed to sync categories from backend:", err);
       }
     }
     syncBackendData();

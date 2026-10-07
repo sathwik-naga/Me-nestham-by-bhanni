@@ -12,6 +12,8 @@ import {
   Menu, X, ChevronDown, LogOut, Settings, LayoutDashboard, ShoppingBag
 } from "lucide-react";
 
+import { deduplicatedFetch } from "../utils/performance";
+
 export default function Header({ onCartClick }) {
   const { user, logout, isAdmin } = useAuth();
   const { cartCount } = useCart();
@@ -29,9 +31,13 @@ export default function Header({ onCartClick }) {
   useEffect(() => {
     async function loadAnnouncement() {
       try {
-        const res = await api.get("/promotions/announcements/active");
-        if (res.data.status === "success" && res.data.data.announcement) {
-          setAnnouncementText(res.data.data.announcement.text);
+        const res = await deduplicatedFetch(
+          "/promotions/announcements/active",
+          () => api.get("/promotions/announcements/active"),
+          600000 // 10 minutes cache TTL
+        );
+        if (res?.status === "success" && res.data?.announcement) {
+          setAnnouncementText(res.data.announcement.text);
         }
       } catch (err) {
         console.error("Failed to load announcement bar text:", err);

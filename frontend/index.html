@@ -5,6 +5,20 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Me Nestham by Bhanni</title>
 
+    <!-- Anti-Flash Default Theme Initialization: Light theme by default, preserves explicit user choice -->
+    <script>
+      (function() {
+        try {
+          var saved = localStorage.getItem('theme') || localStorage.getItem('mn_theme');
+          if (saved === 'dark') {
+            document.documentElement.classList.add('dark');
+          } else {
+            document.documentElement.classList.remove('dark');
+          }
+        } catch (e) {}
+      })();
+    </script>
+
     <!-- SEO Metadata -->
     <meta name="description" content="Premium Garland Making Materials, Artificial Flower Petals, Decoration Supplies, Wedding Accessories &amp; Craft Materials Online." />
     <meta name="keywords" content="Me Nestham, Me Nestham by Bhanni, Garland Materials, Flower Decoration, Artificial Flowers, Wedding Decoration, Craft Supplies, Decoration Materials, Online Garland Store, India" />

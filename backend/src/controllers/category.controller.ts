@@ -17,6 +17,7 @@ export class CategoryController {
 
       if (cached) {
         res.setHeader('X-Cache', 'HIT');
+        res.setHeader('Cache-Control', 'public, max-age=300, stale-while-revalidate=3600');
         res.status(200).json({
           status: 'success',
           results: cached.length,
@@ -29,6 +30,7 @@ export class CategoryController {
       await cacheService.set(cacheKey, categories, 86400); // 24 Hours TTL
 
       res.setHeader('X-Cache', 'MISS');
+      res.setHeader('Cache-Control', 'public, max-age=300, stale-while-revalidate=3600');
       res.status(200).json({
         status: 'success',
         results: categories.length,

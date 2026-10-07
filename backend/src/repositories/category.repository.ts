@@ -11,15 +11,29 @@ export class CategoryRepository {
     try {
       const { data, error } = await supabase
         .from('categories')
-        .select('*')
+        .select('*, products(count)')
         .order('name', { ascending: true });
 
       if (error) {
-        logger.error(`Database error fetching categories: ${error.message}`);
-        throw new AppError('Failed to fetch categories', 500);
+        logger.warn(`Querying categories with products(count) failed, falling back: ${error.message}`);
+        const { data: fallbackData, error: fallbackError } = await supabase
+          .from('categories')
+          .select('*')
+          .order('name', { ascending: true });
+
+        if (fallbackError) {
+          logger.error(`Database error fetching categories: ${fallbackError.message}`);
+          throw new AppError('Failed to fetch categories', 500);
+        }
+
+        return fallbackData as Category[];
       }
 
-      return data as Category[];
+      return (data as any[]).map((c) => ({
+        ...c,
+        productCount: c.products?.[0]?.count ?? 0,
+        product_count: c.products?.[0]?.count ?? 0,
+      })) as Category[];
     } catch (err) {
       if (err instanceof AppError) throw err;
       logger.error(`Unexpected error fetching categories: ${err}`);

@@ -1,11 +1,13 @@
 import { api } from "../api";
 import { deduplicatedFetch } from "../../utils/performance";
+import { normalizeCategories } from "../../utils/imageOptimizer";
 
 export async function getCategories() {
   return deduplicatedFetch("/categories", async () => {
     const result = await api.get("/categories");
-    return result.data.categories;
-  });
+    const raw = result?.data?.categories || [];
+    return normalizeCategories(raw);
+  }, 60000); // 1 minute cache TTL
 }
 
 export async function createCategory(categoryData) {
