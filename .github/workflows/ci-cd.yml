@@ -7,9 +7,12 @@ on:
     branches: [ main ]
 
 jobs:
-  verify-build-and-test:
-    name: Build Verification, ESLint & Integration Tests
+  frontend:
+    name: Frontend Verification & Build
     runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: frontend
 
     strategy:
       matrix:
@@ -24,28 +27,41 @@ jobs:
         with:
           node-version: ${{ matrix.node-version }}
           cache: 'npm'
+          cache-dependency-path: frontend/package-lock.json
 
-      # Frontend Verification
       - name: Install Frontend Dependencies
-        run: |
-          cd frontend
-          npm ci
+        run: npm ci
 
       - name: Build Frontend Project (Vite)
-        run: |
-          cd frontend
-          npm run build
+        run: npm run build
 
-      # Backend Verification
+  backend:
+    name: Backend Verification & Integration Tests
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: backend
+
+    strategy:
+      matrix:
+        node-version: [20.x]
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js ${{ matrix.node-version }}
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ matrix.node-version }}
+          cache: 'npm'
+          cache-dependency-path: backend/package-lock.json
+
       - name: Install Backend Dependencies
-        run: |
-          cd backend
-          npm ci
+        run: npm ci
 
       - name: Compile Backend TypeScript (tsc)
-        run: |
-          cd backend
-          npm run build
+        run: npm run build
 
       - name: Run Backend Tests
         env:
@@ -53,6 +69,4 @@ jobs:
           PORT: 5001
           SUPABASE_URL: https://example.supabase.co
           SUPABASE_ANON_KEY: test_anon_key
-        run: |
-          cd backend
-          npm test || true
+        run: npm test || true
