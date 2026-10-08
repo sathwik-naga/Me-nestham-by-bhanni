@@ -34,12 +34,16 @@ export class AuthService {
       throw new AppError('Registration failed during account creation', 500);
     }
 
-    // Fetch automatically created profile
+    // Fetch automatically created profile with resilient retry/fallback
     let profile = await this.profileRepository.getById(user.id);
+    if (!profile) {
+      await new Promise((resolve) => setTimeout(resolve, 500));
+      profile = await this.profileRepository.getById(user.id);
+    }
 
     if (!profile) {
-      logger.error(`Registration succeeded but automatic profile creation failed for user ID ${user.id}`);
-      throw new AppError('Account registered but profile trigger failed to initialize', 500);
+      logger.warn(`Profile trigger delayed for user ID ${user.id}, creating fallback profile`);
+      profile = await this.profileRepository.create({ id: user.id, full_name: fullName || null });
     }
 
     // If full_name is provided, update the existing profile

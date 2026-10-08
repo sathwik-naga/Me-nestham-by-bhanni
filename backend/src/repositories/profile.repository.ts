@@ -35,7 +35,7 @@ export class ProfileRepository {
    */
   async create(profile: Pick<Profile, 'id' | 'full_name'>): Promise<Profile> {
     try {
-      const { data, error } = await supabase
+      const { data, error } = await supabaseAdmin
         .from('profiles')
         .insert([profile])
         .select()

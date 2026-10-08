@@ -41,21 +41,20 @@ export const AuthProvider = ({ children }) => {
     let dbProfile = null;
 
     try {
-      // 1. Single atomic DB upsert in public.profiles
+      // 1. Single atomic DB upsert in public.profiles matching exact table schema
+      const profileUpdates = {
+        id: authUser.id,
+        full_name: fullName,
+        avatar_url: avatarUrl,
+        updated_at: now
+      };
+      if (phone) {
+        profileUpdates.phone = phone;
+      }
+
       const { data, error } = await supabase
         .from("profiles")
-        .upsert(
-          {
-            id: authUser.id,
-            email,
-            full_name: fullName,
-            avatar_url: avatarUrl,
-            provider: providerName || "google",
-            updated_at: now,
-            last_login_at: now
-          },
-          { onConflict: "id" }
-        )
+        .upsert(profileUpdates, { onConflict: "id" })
         .select()
         .single();
 
